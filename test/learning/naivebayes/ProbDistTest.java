@@ -50,18 +50,6 @@ public class ProbDistTest {
     }
 
     /**
-     * Test of getDistribution method, of class CPD.
-     */
-    //@Test
-    public void testGetDistribution() {
-        System.out.println("getDistribution");
-        ProbDist instance = new ProbDist();
-        HashMap expResult = null;
-        HashMap result = instance.getDistribution();
-        //assertEquals(expResult, result);
-    }
-
-    /**
      * Test of getValues method, of class CPD.
      */
     //@Test
@@ -200,17 +188,6 @@ public class ProbDistTest {
             }
         }
         showArray(counts);
-    }
-    /**
-     * Test of setDistribution method, of class CPD.
-     */
-    //@Test
-    public void testSetDistribution() {
-        System.out.println("setDistribution");
-        ProbDist instance = new ProbDist();
-        instance.setDistribution(null);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
