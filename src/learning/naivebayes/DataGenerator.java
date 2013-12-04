@@ -3,6 +3,7 @@
  * and open the template in the editor.
  */
 package learning.naivebayes;
+import learning.stats.ProbDist;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -125,13 +126,13 @@ public class DataGenerator {
         names.add("Olivia", 0.2);
         names.add("Sean", 0.15);
         names.add("Shiloh", 0.15);
-        names.display();
+        //names.display();
         
         ProbDist<String> colors = new ProbDist<String>();
         colors.add("red", .3);
         colors.add("blue", .4);
         colors.add("yellow", .3);
-        colors.display();
+        //colors.display();
         
         ProbDist<Integer> numbers = new ProbDist<Integer>();
         numbers.add(1, 0.25);
@@ -158,13 +159,13 @@ public class DataGenerator {
         names2.add("Olivia", 0.25);
         names2.add("Sean", 0.25);
         names2.add("Shiloh", 0.20);
-        names2.display();
+        //names2.display();
         
         ProbDist<String> colors2 = new ProbDist<String>();
         colors2.add("red", .2);
         colors2.add("blue", .3);
         colors2.add("yellow", .5);
-        colors2.display();
+        //colors2.display();
         
         ProbDist<Integer> numbers2 = new ProbDist<Integer>();
         numbers2.add(1, 0.33);
@@ -192,13 +193,13 @@ public class DataGenerator {
         names3.add("Olivia", 0.2);
         names3.add("Sean", 0.2);
         names3.add("Shiloh", 0.30);
-        names3.display();
+        //names3.display();
         
         ProbDist<String> colors3 = new ProbDist<String>();
         colors3.add("red", .7);
         colors3.add("blue", .15);
         colors3.add("yellow", .15);
-        colors3.display();
+        //colors3.display();
         
         ProbDist<Integer> numbers3 = new ProbDist<Integer>();
         numbers3.add(1, 0.15);

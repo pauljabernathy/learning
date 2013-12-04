@@ -2,8 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package learning.naivebayes;
+package learning.stats;
 
+import learning.stats.ProbDist;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
@@ -124,7 +125,7 @@ public class ProbDistTest {
         showArrayList(instance.getValues());
     }
     
-    //@Test
+    @Test
     public void testValidateNormalized() {
         System.out.println("\ntesting validateNormalized()");
         ArrayList<Double> probs = null;
@@ -198,7 +199,7 @@ public class ProbDistTest {
         System.out.println("getProbabilities");
         ProbDist instance = new ProbDist();
         ArrayList expResult = null;
-        ArrayList result = instance.getProbabilities();
+        List result = instance.getProbabilities();
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
@@ -270,5 +271,128 @@ public class ProbDistTest {
         assertEquals(0.0, instance.probatilityOf("Pau"), 0.0);
         assertEquals(0.0, instance.probatilityOf("false"), 0.0);
         assertEquals(0.0, instance.probatilityOf(null), 0.0);
+    }
+    
+    @Test
+    public void testCreateInstanceFromCounts() {
+        System.out.println("\ntesting createInstanceFromCounts()");
+        ProbDist<String> result = null;
+        ProbDist.createInstanceFromCounts(null, null);
+        
+        ArrayList<String> strValues = new ArrayList<String>();
+        strValues.add("A");
+        strValues.add("B");
+        strValues.add("C");
+        
+        ArrayList<Integer> counts = new ArrayList<Integer>();
+        counts.add(10);
+        counts.add(20);
+        counts.add(10);
+        
+        //TODO:  use assertEquals instead of display()
+        result = ProbDist.createInstanceFromCounts(strValues, counts);
+        result.display();
+        
+        counts.add(60);
+        /*result = ProbDist.createInstanceFromCounts(strValues, counts);  //blows up as inteded because of the assert line
+        result.display();*/
+        strValues.add("C");
+        result = ProbDist.createInstanceFromCounts(strValues, counts);  //blows up as inteded because of the assert line
+        result.display();
+        
+        ArrayList<Boolean> boolValues = new ArrayList<Boolean>();
+        boolValues.add(true);
+        boolValues.add(false);
+        ArrayList<Integer> boolCounts = new ArrayList<Integer>();
+        boolCounts.add(100);
+        boolCounts.add(150);
+        
+        ProbDist<Boolean> resultBool = ProbDist.createInstanceFromCounts(boolValues, boolCounts);  //blows up as inteded because of the assert line
+        resultBool.display();
+    }
+    
+    @Test
+    public void testGetJointDistribution() {
+        System.out.println("\ntesting getJointDistribution()");
+        ProbDist<String> fruit = new ProbDist<String>();
+        fruit.add("blueberries", .7);
+        fruit.add("grapes", .3);
+        
+        ProbDist<String> mains = new ProbDist<String>();
+        mains.add("steak", .5);
+        mains.add("mutton", .1);
+        mains.add("Maine Lobster", .4);
+        
+        ProbDist<List> joint = ProbDist.getJointDistribution(fruit, mains);
+        assertEquals(6, joint.getValues().size());
+        for(List<String> values : joint.getValues()) {
+            assertEquals(2, values.size());
+        }
+        joint.display();
+        assertEquals("blueberries", joint.getValues().get(0).get(0));
+        assertEquals("steak", joint.getValues().get(0).get(1));
+        assertEquals("blueberries", joint.getValues().get(1).get(0));
+        assertEquals("mutton", joint.getValues().get(1).get(1));
+        assertEquals("blueberries", joint.getValues().get(2).get(0));
+        assertEquals("Maine Lobster", joint.getValues().get(2).get(1));
+        
+        assertEquals("grapes", joint.getValues().get(3).get(0));
+        assertEquals("steak", joint.getValues().get(3).get(1));
+        assertEquals("grapes", joint.getValues().get(4).get(0));
+        assertEquals("mutton", joint.getValues().get(4).get(1));
+        assertEquals("grapes", joint.getValues().get(5).get(0));
+        assertEquals("Maine Lobster", joint.getValues().get(5).get(1));
+        
+        assertEquals(.35, joint.getProbabilities().get(0), .00001);
+        assertEquals(.07, joint.getProbabilities().get(1), .00001);
+        assertEquals(.28, joint.getProbabilities().get(2), .00001);
+        assertEquals(.15, joint.getProbabilities().get(3), .00001);
+        assertEquals(.03, joint.getProbabilities().get(4), .00001);
+        assertEquals(.12, joint.getProbabilities().get(5), .00001);
+    }
+    
+    @Test
+    public void testGetEntropy() {
+        System.out.println("\ntesting getEntropy()");
+        ProbDist<String> instance = new ProbDist<String>();
+        //try {
+            assertEquals(0.0, instance.getEntropy(), .0000001);
+        /*} catch(ProbabilityException e) {
+            System.err.println(e.getMessage());
+        }*/
+        
+        //try {
+            instance.add("first", 0.2424242);
+            System.out.println(instance.getEntropy());
+            System.out.println(ProbDist.validateNormalized(instance.getProbabilities()));
+            learning.util.Utilities.showList(instance.getProbabilities());
+            //fail("did not throw the exception");
+        /*} catch(ProbabilityException e) {
+            System.err.println(e.getMessage());
+        }*/
+        
+        //try {
+            instance.add("second", 0.2065095);
+            instance.add("third", 0.5510662);
+
+            assertEquals(1.439321, instance.getEntropy(), .001);
+        /*} catch(ProbabilityException e) {
+            System.err.println(e.getMessage());
+        }*/
+    }
+    
+    @Test
+    public void testGetMutualInformation() {
+        System.out.println("\ntesting getMutualInformation");
+        ProbDist<String> fruit = new ProbDist<String>();
+        fruit.add("blueberries", .7);
+        fruit.add("grapes", .3);
+        
+        ProbDist<String> mains = new ProbDist<String>();
+        mains.add("steak", .5);
+        mains.add("mutton", .1);
+        mains.add("Maine Lobster", .4);
+        
+        System.out.println(ProbDist.getMutualInformation(fruit, mains));
     }
 }

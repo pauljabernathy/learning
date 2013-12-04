@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package learning.naivebayes;
+package learning.stats;
 import java.util.*;
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -12,7 +12,6 @@ import java.math.MathContext;
  * @author paul
  */
 public class ProbDist<T> {
-    //private HashMap<T, Double> distribution;
     private ArrayList<T> values;
     ArrayList<Double> probabilities;
     private final T UNKNOWN = null;
@@ -29,9 +28,6 @@ public class ProbDist<T> {
         this.values.add(UNKNOWN);
         this.probabilities.add(1.0);
     }
-    /*public HashMap<T, Double> getDistribution() {
-        return distribution;
-    }*/
 
     public List<T> getValues() {
         return values;
@@ -134,16 +130,12 @@ public class ProbDist<T> {
         return this.getValues().get(index);
     }
     
-    /*public void setDistribution(HashMap<T, Double> distribution) {
-        this.distribution = distribution;
-    }*/
-
-    public ArrayList<Double> getProbabilities() {
+    public List<Double> getProbabilities() {
         return probabilities;
     }
 
-    public void setProbabilities(ArrayList<Double> probabilities) {
-        this.probabilities = probabilities;
+    public void setProbabilities(List<Double> probabilities) {
+        this.probabilities = (ArrayList)probabilities;
     }
     
     public boolean contains(T value) {
@@ -158,13 +150,88 @@ public class ProbDist<T> {
         }
     }
     
-    public void display() {
-        System.out.println("\n\n");
+    //TODO:  Check that the values in "values" are unique.  Also I'm not sure about the assert line...
+    //might should just through an exception for bad input.
+    public static <E> ProbDist<E> createInstanceFromCounts(List<E> values, List<Integer> counts) {
+        if(values == null || values.isEmpty() || counts == null || counts.isEmpty()) {
+            return new ProbDist<E>();
+        }
+        assert(values.size() == counts.size()):"sizes don't match up";
+        int sum = 0;
+        for(int i = 0; i < counts.size(); i++) {
+            sum += counts.get(i);
+        }
+        ArrayList<Double> percents = new ArrayList<Double>();
+        for(int i = 0; i < counts.size(); i++) {
+            percents.add(counts.get(i) / (double)sum);
+        }
+        
+        ProbDist result = new ProbDist();
+        result.setValues(values);
+        result.setProbabilities(percents);
+        return result;
+    }
+    
+    public static ProbDist<List> getJointDistribution(ProbDist left, ProbDist right) {
+        
+        //find all combinations
+        //get probs for each combination
+        //put combo and prob into result
+        ProbDist<List> result = new ProbDist<List>();
+        for(int i = 0; i < left.getValues().size(); i++) {
+            for(int j = 0; j < right.getValues().size(); j++) {
+                List values = new ArrayList();
+                values.add(left.getValue(i));
+                values.add(right.getValue(j));
+                result.add(values, (double)left.getProbabilities().get(i) * (double)right.getProbabilities().get(j));
+            }
+        }
+        return result;
+    }
+    
+    public double getEntropy() {//throws ProbabilityException {
+        return this.calculateEntropy();
+    }
+    
+    private double calculateEntropy() {//throws ProbabilityException {
+        if(this.probabilities == null) {
+            return 0.0;
+        }
+        if(!validateNormalized(this.probabilities)) {
+            //throw new ProbabilityException("Cannot calculate the entropy of a non normalized probability distribution.");
+        }
+        double H = 0.0;
+        for(Double p : this.probabilities) {
+            H -= p * learning.util.Utilities.logBase2(p);
+        }
+        return H;
+    }
+    
+    /**
+     * This function as it currently is is worthless because it calculate the joint distribution under the assumption that the two
+     * variables are independent, meaning mutual information will always be 0.  We need to get a joint distribution empirically
+     * (or some means other than the getJointDistribution() function) before the mutual information will mean anything.
+     * @param x
+     * @param y
+     * @return 
+     */
+    public static double getMutualInformation(ProbDist x, ProbDist y) {
+        return x.getEntropy() + y.getEntropy() - ProbDist.getJointDistribution(x, y).getEntropy();
+    }
+    
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
         double total = 0.0;
         for(int i = 0; i < this.getProbabilities().size(); i++) {
-            System.out.println(this.getValues().get(i) + " " + this.getProbabilities().get(i));
+            sb.append(this.getValues().get(i)).append(" ").append(this.getProbabilities().get(i)).append(";  ");
+            sb.append("\n");
             total += this.getProbabilities().get(i);
         }
-        System.out.println("total = " + total);
+        //sb.append("total = " + total);
+        return sb.toString();
+    }
+    
+    public void display() {
+        System.out.println(this.toString());
     }
 }
