@@ -22,11 +22,15 @@ public class ProbDist<T> {
     }
 
     public void reset() {
-        //this.setDistribution(new HashMap<T, Double>());
-        this.setValues(new ArrayList<T>());
-        this.setProbabilities(new ArrayList<Double>());
-        this.values.add(UNKNOWN);
-        this.probabilities.add(1.0);
+        try {
+            ArrayList<T> values = new ArrayList<T>();
+            values.add(UNKNOWN);
+            ArrayList<Double> probs = new ArrayList<Double>();
+            probs.add(1.0);
+            this.setValuesAndProbabilities(values, probs);
+        } catch(ProbabilityException e) {
+            System.err.println(e.getClass() + " in reset():  " + e.getMessage());
+        }
     }
 
     public List<T> getValues() {
@@ -54,6 +58,15 @@ public class ProbDist<T> {
         this.values = (ArrayList<T>)values;
     }
 
+    public void setValuesAndProbabilities(List<T> values, List<Double> probs) throws ProbabilityException {
+        if(values == null || values.size() < 1 || probs == null || probs.size() < 1 || values.size() != probs.size()) {
+            throw new ProbabilityException("values must probabilities be non null, non empty, of of the same length");
+        } else {
+            this.setValues(values);
+            this.setProbabilities(probs);
+        }
+    }
+    
     public boolean add(T value, double probability) {
         //TODO:  value.equals("") does not work with generics
         if(value == null || value.equals("") || probability <= 0.0 || probability >= 1.0) {
@@ -134,7 +147,10 @@ public class ProbDist<T> {
         return probabilities;
     }
 
-    public void setProbabilities(List<Double> probabilities) {
+    public void setProbabilities(List<Double> probabilities) throws ProbabilityException {
+        if(probabilities == null || probabilities.size() == 0 || probabilities.size() != this.getValues().size()) {
+            throw new ProbabilityException("The number of probabilities must match the number of values.");
+        }
         this.probabilities = (ArrayList)probabilities;
     }
     
@@ -153,7 +169,7 @@ public class ProbDist<T> {
     //TODO:  Check that the values in "values" are unique.  Also I'm not sure about the assert line...
     //might should just through an exception for bad input.
     public static <E> ProbDist<E> createInstanceFromCounts(List<E> values, List<Integer> counts) {
-        if(values == null || values.isEmpty() || counts == null || counts.isEmpty()) {
+        if(values == null || values.isEmpty() || counts == null || counts.isEmpty() || values.size() != counts.size()) {
             return new ProbDist<E>();
         }
         assert(values.size() == counts.size()):"sizes don't match up";
@@ -167,8 +183,14 @@ public class ProbDist<T> {
         }
         
         ProbDist result = new ProbDist();
-        result.setValues(values);
-        result.setProbabilities(percents);
+        //result.setValues(values);
+        //result.setProbabilities(percents);
+        try {
+            result.setValuesAndProbabilities(values, percents);
+        } catch(ProbabilityException e) {
+            //should not get here since values and counts are already checked
+            System.err.println(e.getClass() + " in createInstanceFromCounts():  " + e.getMessage());
+        }
         return result;
     }
     

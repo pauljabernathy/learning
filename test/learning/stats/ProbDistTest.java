@@ -8,6 +8,7 @@ import learning.stats.ProbDist;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
+import learning.util.Utilities;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -15,17 +16,24 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+import org.apache.log4j.*;
+
 /**
  *
  * @author paul
  */
 public class ProbDistTest {
     
+    private static Logger logger;
+    
     public ProbDistTest() {
     }
     
     @BeforeClass
     public static void setUpClass() {
+        logger = Logger.getLogger(ProbDistTest.class);
+        logger.addAppender(new ConsoleAppender(new PatternLayout(learning.Constants.DEFAULT_LOG_FORMAT)));
+        logger.setLevel(Level.DEBUG);
     }
     
     @AfterClass
@@ -43,9 +51,9 @@ public class ProbDistTest {
     /**
      * Test of reset method, of class CPD.
      */
-    //@Test
+    @Test
     public void testReset() {
-        System.out.println("reset");
+        logger.info("\nreset()");
         ProbDist instance = new ProbDist();
         instance.reset();
     }
@@ -53,15 +61,23 @@ public class ProbDistTest {
     /**
      * Test of getValues method, of class CPD.
      */
-    //@Test
+    @Test
     public void testGetValues() {
-        System.out.println("getValues");
+        logger.info("\ntesting getValues()");
         ProbDist instance = new ProbDist();
-        ArrayList expResult = null;
         List result = instance.getValues();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        if(result == null) {
+            fail("result was null");
+        }
+        instance.add("A", .3);
+        instance.add("B", .4);
+        instance.add("C", .1);
+        result = instance.getValues();
+        assertEquals(4, result.size());
+        assertEquals(null, result.get(0));
+        assertEquals("A", result.get(1));
+        assertEquals("B", result.get(2));
+        assertEquals("C", result.get(3));
     }
 
     /**
@@ -69,7 +85,7 @@ public class ProbDistTest {
      */
     //@Test
     public void testGetValue() {
-        System.out.println("getValue");
+        logger.info("\ntesting getValue()");
         int index = 0;
         ProbDist<String> instance = new ProbDist<String>();
         assertEquals(null, instance.getValue(0));
@@ -86,48 +102,48 @@ public class ProbDistTest {
      */
     //@Test
     public void testSetValues() {
-        System.out.println("setValues");
+        logger.info("\nsetValues()");
         ProbDist instance = new ProbDist();
         instance.setValues(null);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
 
-    //@Test
+    @Test
     public void testAdd() {
-        System.out.println("\ntesting add()");
+        logger.info("\ntesting add()");
         ProbDist<String> instance = new ProbDist<String>();
         boolean result = false;
-        System.out.println(instance.contains("Paul"));
-        result = instance.add("Paul", 0.5);
+        logger.debug(instance.contains("Duke"));
+        result = instance.add("Duke", 0.5);
         assertEquals(true, result);
         instance.display();
-        result = instance.add("Lora", 0.501);
+        result = instance.add("UNC", 0.501);
         assertEquals(false, result);
         instance.display();
         
-        result = instance.add("Lora", 0.50);
+        result = instance.add("UNC", 0.50);
         assertEquals(true, result);
         instance.display();
         
         instance.reset();
-        System.out.println("\n\nresetting");
-        instance.add("Paul", 0.2);
-        instance.add("Lora", 0.3);
-        instance.add("Olivia", 0.2);
-        instance.add("Sean", 0.15);
-        result = instance.add("Shiloh", 0.15);
-        System.out.println("added Shiloh? " + result);
+        logger.debug("\n\nresetting");
+        instance.add("Duke", 0.2);
+        instance.add("UNC", 0.3);
+        instance.add("Wake Forest", 0.2);
+        instance.add("NC State", 0.15);
+        result = instance.add("GA Tech", 0.15);
+        logger.debug("added GA Tech? " + result);
         instance.display();
-        System.out.println("probs;");
+        logger.debug("probs;");
         showArrayList(instance.getProbabilities());
-        System.out.println("values");
+        logger.debug("values");
         showArrayList(instance.getValues());
     }
     
     @Test
     public void testValidateNormalized() {
-        System.out.println("\ntesting validateNormalized()");
+        logger.info("\ntesting validateNormalized()");
         ArrayList<Double> probs = null;
         assertEquals(false, ProbDist.validateNormalized(probs));
         
@@ -150,21 +166,21 @@ public class ProbDistTest {
         assertEquals(false, ProbDist.validateNormalized(probs));
     }
     
-    //@Test
+    @Test
     public void testGetRandomValue() {
-        System.out.println("\ntesting getRandomFeature()");
+        logger.info("\ntesting getRandomFeature()");
         ProbDist<String> instance = new ProbDist<String>();
         boolean added = false;
-        instance.add("Paul", 0.2);
-        instance.add("Lora", 0.3);
-        instance.add("Olivia", 0.2);
-        instance.add("Sean", 0.15);
-        added = instance.add("Shiloh", 0.15);
-        System.out.println("added Shiloh? " + added);
+        instance.add("Duke", 0.2);
+        instance.add("UNC", 0.3);
+        instance.add("Wake Forest", 0.2);
+        instance.add("NC State", 0.15);
+        added = instance.add("GA Tech", 0.15);
+        logger.debug("added GA Tech? " + added);
         assertEquals(true, ProbDist.validateNormalized(instance.getProbabilities()));
-        /*System.out.println("values");
+        /*logger.debug("values");
         showArrayList(instance.getValues());
-        System.out.println("probabilities");
+        logger.debug("probabilities");
         showArrayList(instance.getProbabilities());*/
         instance.display();
         int[] counts = new int[5];
@@ -172,19 +188,19 @@ public class ProbDistTest {
         String rand = "";
         for(int i = 0; i < numRands; i++) {
             rand = instance.getRandomValue();
-            //System.out.println(i + " " + rand);
+            //logger.debug(i + " " + rand);
             if(rand == null) {
                 fail("was null");
             }
-            if(rand.equals("Paul")) {
+            if(rand.equals("Duke")) {
                 counts[0]++;
-            } else if(rand.equals("Lora")) {
+            } else if(rand.equals("UNC")) {
                 counts[1]++;
-            } else if(rand.equals("Olivia")) {
+            } else if(rand.equals("Wake Forest")) {
                 counts[2]++;
-            } else if(rand.equals("Sean")) {
+            } else if(rand.equals("NC State")) {
                 counts[3]++;
-            } else if(rand.equals(("Shiloh"))) {
+            } else if(rand.equals(("GA Tech"))) {
                 counts[4]++;
             }
         }
@@ -194,43 +210,56 @@ public class ProbDistTest {
     /**
      * Test of getProbabilities method, of class CPD.
      */
-    //@Test
+    @Test
     public void testGetProbabilities() {
-        System.out.println("getProbabilities");
+        logger.info("\ntesting getProbabilities()");
         ProbDist instance = new ProbDist();
-        ArrayList expResult = null;
         List result = instance.getProbabilities();
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertEquals(1.0, result.get(0));
+        
+        instance.add("A", .3);
+        instance.add("B", .4);
+        instance.add("C", .1);
+        result = instance.getProbabilities();
+        assertEquals(4, result.size());
     }
 
     /**
      * Test of setProbabilities method, of class CPD.
      */
-    //@Test
+    @Test
     public void testSetProbabilities() {
-        System.out.println("setProbabilities");
+        logger.info("\n testing setProbabilities()");
         ArrayList<Double> probabilities = null;
         ProbDist instance = new ProbDist();
-        instance.setProbabilities(probabilities);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        try {
+            instance.setProbabilities(null);
+            if(instance.getProbabilities() == null) {
+                fail("probabilities was null");
+            }
+        } catch(ProbabilityException e) {
+            
+        }
     }
 
     /**
      * Test of contains method, of class CPD.
      */
-    //@Test
+    @Test
     public void testContains() {
-        System.out.println("contains");
+        logger.info("\ntesting contains()");
         Object value = null;
         ProbDist instance = new ProbDist();
-        boolean expResult = false;
         boolean result = instance.contains(value);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        assertEquals(true, result);
+        //List values = instance.getValues();
+        instance.add("a", .5);
+        assertEquals(true, instance.contains("a"));
+        assertEquals(false, instance.contains("b"));
+        //values = instance.getValues();
+        instance.add("b", .5);
+        //values = instance.getValues();
+        logger.debug(Utilities.listToString(instance.getValues()));
     }
     
     private void showArray(int[] input) {
@@ -238,7 +267,7 @@ public class ProbDistTest {
             return;
         }
         for(int i = 0; i < input.length; i++) {
-            System.out.println(input[i]);
+            logger.debug(input[i]);
         }
     }
     
@@ -246,36 +275,36 @@ public class ProbDistTest {
         if(input == null) {
             return;
         }
-        System.out.println("\n");
+        logger.debug("\n");
         for(int i = 0; i < input.size(); i++) {
-            System.out.println(i + " " + input.get(i));
+            logger.debug(i + " " + input.get(i));
         }
     }
     
     @Test
     public void testProbabilityOf() {
-        System.out.println("\ntesting probabilityOf()");
+        logger.info("\ntesting probabilityOf()");
         ProbDist<String> instance = new ProbDist<String>();
-        instance.add("Paul", 0.2);
-        instance.add("Lora", 0.3);
-        instance.add("Olivia", 0.2);
-        instance.add("Sean", 0.15);
-        instance.add("Shiloh", 0.15);
+        instance.add("Duke", 0.2);
+        instance.add("UNC", 0.3);
+        instance.add("Wake Forest", 0.2);
+        instance.add("NC State", 0.15);
+        instance.add("GA Tech", 0.15);
         //instance.display();
-        assertEquals(.2, instance.probatilityOf("Paul"), 0.0);
-        assertEquals(.3, instance.probatilityOf("Lora"), 0.0);
-        assertEquals(.2, instance.probatilityOf("Olivia"), 0.0);
-        assertEquals(.15, instance.probatilityOf("Sean"), 0.0);
-        assertEquals(.15, instance.probatilityOf("Shiloh"), 0.0);
+        assertEquals(.2, instance.probatilityOf("Duke"), 0.0);
+        assertEquals(.3, instance.probatilityOf("UNC"), 0.0);
+        assertEquals(.2, instance.probatilityOf("Wake Forest"), 0.0);
+        assertEquals(.15, instance.probatilityOf("NC State"), 0.0);
+        assertEquals(.15, instance.probatilityOf("GA Tech"), 0.0);
         
-        assertEquals(0.0, instance.probatilityOf("Pau"), 0.0);
+        assertEquals(0.0, instance.probatilityOf("Duk"), 0.0);
         assertEquals(0.0, instance.probatilityOf("false"), 0.0);
         assertEquals(0.0, instance.probatilityOf(null), 0.0);
     }
     
     @Test
     public void testCreateInstanceFromCounts() {
-        System.out.println("\ntesting createInstanceFromCounts()");
+        logger.info("\ntesting createInstanceFromCounts()");
         ProbDist<String> result = null;
         ProbDist.createInstanceFromCounts(null, null);
         
@@ -313,7 +342,7 @@ public class ProbDistTest {
     
     @Test
     public void testGetJointDistribution() {
-        System.out.println("\ntesting getJointDistribution()");
+        logger.info("\ntesting getJointDistribution()");
         ProbDist<String> fruit = new ProbDist<String>();
         fruit.add("blueberries", .7);
         fruit.add("grapes", .3);
@@ -353,7 +382,7 @@ public class ProbDistTest {
     
     @Test
     public void testGetEntropy() {
-        System.out.println("\ntesting getEntropy()");
+        logger.info("\ntesting getEntropy()");
         ProbDist<String> instance = new ProbDist<String>();
         //try {
             assertEquals(0.0, instance.getEntropy(), .0000001);
@@ -363,8 +392,8 @@ public class ProbDistTest {
         
         //try {
             instance.add("first", 0.2424242);
-            System.out.println(instance.getEntropy());
-            System.out.println(ProbDist.validateNormalized(instance.getProbabilities()));
+            logger.debug(instance.getEntropy());
+            logger.debug(ProbDist.validateNormalized(instance.getProbabilities()));
             learning.util.Utilities.showList(instance.getProbabilities());
             //fail("did not throw the exception");
         /*} catch(ProbabilityException e) {
@@ -383,7 +412,7 @@ public class ProbDistTest {
     
     @Test
     public void testGetMutualInformation() {
-        System.out.println("\ntesting getMutualInformation");
+        logger.info("\ntesting getMutualInformation");
         ProbDist<String> fruit = new ProbDist<String>();
         fruit.add("blueberries", .7);
         fruit.add("grapes", .3);
@@ -393,6 +422,6 @@ public class ProbDistTest {
         mains.add("mutton", .1);
         mains.add("Maine Lobster", .4);
         
-        System.out.println(ProbDist.getMutualInformation(fruit, mains));
+        logger.debug(ProbDist.getMutualInformation(fruit, mains));
     }
 }

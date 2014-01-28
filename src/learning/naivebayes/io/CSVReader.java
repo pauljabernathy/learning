@@ -4,6 +4,7 @@
  */
 package learning.naivebayes.io;
 
+import learning.Constants;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -14,7 +15,6 @@ import learning.naivebayes.Classification;
 import learning.naivebayes.Classifier;
 import learning.stats.Histogram;
 import learning.stats.ProbDist;
-import learning.titanic.Constants;
 
 /**
  *
@@ -51,7 +51,7 @@ public class CSVReader {
         } catch (IOException e) {
             System.out.println(e.getClass() + " in classify(" + filename + ") at line " + lineNum + ":  " + e.getMessage());
         }
-        System.out.println("leaving loadFile(" + filename + ") at " + new Date());
+        //System.out.println("leaving loadFile(" + filename + ") at " + new Date());
         return result;
     }
 
@@ -61,8 +61,8 @@ public class CSVReader {
         List<ProbDist> dists = null;
         ProbDist<Classification> result = new ProbDist<Classification>();
         for (String currentName : classNames) {
-            try {
-                dists = getFeatureDists("titanic.csv", Constants.SURVIVED_COLUMN, currentName, featureColumns, Constants.DEFAULT_SEPARATOR);
+            try {//TODO: remove magic values
+                dists = getFeatureDists("titanic.csv", 1, currentName, featureColumns, Constants.DEFAULT_SEPARATOR);
                 Classification c = new Classification(currentName);
                 c.setFeatureDists(dists);
                 result.add(c, classDist.probatilityOf(currentName));
@@ -270,11 +270,11 @@ public class CSVReader {
 
     public static double getMutualInformation(String filename, int column1, int column2, String columnSeparator) throws IOException {
         double HXY = getJointDistribution(filename, new int[] { column1, column2}, columnSeparator).getEntropy();
-        System.out.println("HXY = " + HXY);
+        //System.out.println("HXY = " + HXY);
         double HX = getSingleDistribution(filename, column1, columnSeparator).getEntropy();
-        System.out.println("HX = " + HX);
+        //System.out.println("HX = " + HX);
         double HY = getSingleDistribution(filename, column2, columnSeparator).getEntropy();
-        System.out.println("HY = " + HY);
+        //System.out.println("HY = " + HY);
         return HX + HY - HXY;
     }
     static String scrub(String input) {

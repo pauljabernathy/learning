@@ -121,11 +121,11 @@ public class DataGenerator {
         Classification c1 = new Classification("c1");
         Classification c2 = new Classification("c2");
         ProbDist<String> names = new ProbDist<String>();
-        names.add("Paul", 0.2);
-        names.add("Lora", 0.3);
-        names.add("Olivia", 0.2);
-        names.add("Sean", 0.15);
-        names.add("Shiloh", 0.15);
+        names.add("Duke", 0.2);
+        names.add("UNC", 0.3);
+        names.add("Wake Forest", 0.2);
+        names.add("NC State", 0.15);
+        names.add("GA Tech", 0.15);
         //names.display();
         
         ProbDist<String> colors = new ProbDist<String>();
@@ -154,11 +154,11 @@ public class DataGenerator {
         c1.setFeatureDists(dists);
         
         ProbDist<String> names2 = new ProbDist<String>();
-        names2.add("Paul", 0.05);
-        names2.add("Lora", 0.25);
-        names2.add("Olivia", 0.25);
-        names2.add("Sean", 0.25);
-        names2.add("Shiloh", 0.20);
+        names2.add("Duke", 0.05);
+        names2.add("UNC", 0.25);
+        names2.add("Wake Forest", 0.25);
+        names2.add("NC State", 0.25);
+        names2.add("GA Tech", 0.20);
         //names2.display();
         
         ProbDist<String> colors2 = new ProbDist<String>();
@@ -188,11 +188,11 @@ public class DataGenerator {
         
         Classification c3 = new Classification("c3");
         ProbDist<String> names3 = new ProbDist<String>();
-        names3.add("Paul", 0.15);
-        names3.add("Lora", 0.15);
-        names3.add("Olivia", 0.2);
-        names3.add("Sean", 0.2);
-        names3.add("Shiloh", 0.30);
+        names3.add("Duke", 0.15);
+        names3.add("UNC", 0.15);
+        names3.add("Wake Forest", 0.2);
+        names3.add("NC State", 0.2);
+        names3.add("GA Tech", 0.30);
         //names3.display();
         
         ProbDist<String> colors3 = new ProbDist<String>();

@@ -4,6 +4,7 @@
  */
 package learning.stats;
 
+import learning.Constants;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -11,17 +12,24 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+import org.apache.log4j.*;
+
 /**
  *
  * @author paul
  */
 public class DataListTest {
     
+    private static Logger logger;
+    
     public DataListTest() {
     }
     
     @BeforeClass
     public static void setUpClass() {
+        logger = Logger.getLogger(DataListTest.class);
+        logger.addAppender(new ConsoleAppender(new PatternLayout(Constants.DEFAULT_LOG_FORMAT)));
+        logger.setLevel(Level.DEBUG);
     }
     
     @AfterClass
@@ -38,7 +46,7 @@ public class DataListTest {
 
     @Test
     public void testAdd() {
-        System.out.println("\ntesting add()");
+        logger.info("\ntesting add()");
         DataList instance = new DataList();
         instance.add("a");
         //instance.print();
@@ -54,7 +62,7 @@ public class DataListTest {
 
     @Test
     public void testGetHistogram() {
-        System.out.println("\ntesting getHistogram()");
+        logger.info("\ntesting getHistogram()");
         DataList instance = new DataList();
         Histogram result = instance.getHistogram();
         assertEquals(0, result.size());
@@ -66,7 +74,7 @@ public class DataListTest {
 
     @Test
     public void testSize() {
-        System.out.println("\ntesting size()");
+        logger.info("\ntesting size()");
         DataList instance = new DataList();
         int result = instance.size();
         assertEquals(0, instance.size());
@@ -78,7 +86,7 @@ public class DataListTest {
 
     @Test
     public void testGet() {
-        System.out.println("\ntesting get()");
+        logger.info("\ntesting get()");
         int index = 0;
         DataList instance = new DataList();
         instance.add("0");

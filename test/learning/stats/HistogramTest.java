@@ -12,6 +12,8 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import java.util.List;
+import org.apache.log4j.*;
+import learning.util.Utilities;
 
 /**
  *
@@ -19,11 +21,16 @@ import java.util.List;
  */
 public class HistogramTest {
     
+    private static Logger logger;
+    
     public HistogramTest() {
     }
     
     @BeforeClass
     public static void setUpClass() {
+        logger = Logger.getLogger(HistogramTest.class);
+        logger.addAppender(new ConsoleAppender(new PatternLayout(learning.Constants.DEFAULT_LOG_FORMAT)));
+        logger.setLevel(Level.INFO);
     }
     
     @AfterClass
@@ -40,7 +47,7 @@ public class HistogramTest {
 
     @Test
     public void testSetDataList() {
-        System.out.println("\ntesting setDataList()");
+        logger.info("\ntesting setDataList()");
         Histogram instance = new Histogram();
         DataList<Double> d = new DataList<Double>();
         d.add(5.0).add(2.0).add(5.0);
@@ -60,34 +67,26 @@ public class HistogramTest {
 
     @Test
     public void testGetProbDist() {
-        System.out.println("\ntesting getProbDist()");
+        logger.info("\ntesting getProbDist()");
         Histogram instance = new Histogram();
         DataList<String> list = new DataList<String>();
         list.add("a").add("b").add("b").add("a").add("b");
         instance.setDataList(list);
-        showList(instance.getValues());
-        showList(instance.getCounts());
-        showList(instance.getProbabilities());
-        //instance.
+        logger.debug(Utilities.listToString(instance.getValues()));
+        logger.debug(Utilities.listToString(instance.getCounts()));
+        logger.debug(Utilities.listToString(instance.getProbabilities()));
         ProbDist pd = instance.getProbDist();
         List<Double> probs = pd.getProbabilities();
         List<String> values = pd.getValues();
         int aIndex = values.indexOf("a");
-        //assertEquals(probs.get(aIndex), .4, .0001);
+        assertEquals(probs.get(aIndex), .4, .0001);
         int bIndex = values.indexOf("b");
-        //assertEquals(probs.get(bIndex), .6, .0001);
-        pd.display();
+        assertEquals(probs.get(bIndex), .6, .0001);
+        logger.debug(pd.toString());
     }
     
     @Test
     public void testSize() {
-        System.out.println("\ntesting size()");
-    }
-    
-    public void showList(List list) {
-        for(int i = 0; i < list.size(); i++) {
-            System.out.print(list.get(i) + " ");
-        }
-        System.out.println();
+        logger.info("\ntesting size()");
     }
 }

@@ -4,7 +4,6 @@
  */
 package learning.naivebayes;
 
-import learning.titanic.Constants;
 import learning.stats.*;
 import learning.naivebayes.io.*;
 
@@ -12,6 +11,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Date;
 import java.io.*;
+
+import org.apache.log4j.*;
 
 /**
  *
@@ -22,13 +23,23 @@ public class Classifier {
     private ProbDist<Classification> dist;
     //private static final String SEPARATOR = ",";
     private static final int MAX_LINES = 2000000;
+    private Logger logger;
     
     public Classifier() {
+        this(learning.Constants.DEFAULT_LOG_LEVEL);
+    }
+    
+    public Classifier(Level level) {
         this.setDist(DataGenerator.getSampleProbDist());
         Classification c = dist.getValues().get(0);
         List<ProbDist> dists = c.getFeatureCPDs();
+        
+        logger = Logger.getLogger(this.getClass());
+        logger.addAppender(new ConsoleAppender(new PatternLayout(learning.Constants.DEFAULT_LOG_FORMAT)));
+        logger.setLevel(level);
+        
         for(ProbDist currentDist : dists) {
-            //System.out.println(currentDist.getValues().get(0).getClass());
+            //logger.debug(currentDist.getValues().get(0).getClass());
         }
     }
 
@@ -54,13 +65,12 @@ public class Classifier {
             //System.out.print(count++ + " ");
             /**/
             int i = 0;
-            //System.out.println("features.size() = " + features.size());
+            logger.debug("features.size() = " + features.size());
             for(Object feature : features) {
                 //System.out.print(i++ + " " + feature + " ");System.out.flush();
             }/**/
-            //System.out.println();
             Classification classification = this.classifyOne(features);
-            //System.out.println(classification.getName());
+            logger.debug(classification.getName());
             results.add(classification.getName());
         }
         return results;
@@ -77,7 +87,7 @@ public class Classifier {
         //prob of classification x given features = (prob of features given class x times prob of class x) / total prob of features
         
         double pF = findProbOfFeatures(features);
-        //System.out.println(pF);
+        logger.debug(pF);
         //TODO:  error checking on pf being 0! -> return null or an empty classification since this would mean we have a set of features that cannot happen in our set of classifications
         
         double pCgivenF = 0.0;
@@ -89,7 +99,7 @@ public class Classifier {
         for(int i = 0; i < dist.getValues().size(); i++) {
             Classification currentClass = dist.getValues().get(i);
             pFgivenC = currentClass.probabilityOf(features);
-            //System.out.println(pFgivenC);
+            logger.debug(pFgivenC);
             pC = dist.getProbabilities().get(i);
             pCgivenF = pFgivenC * pC / pF;
             if(pCgivenF > highestProb) {

@@ -4,7 +4,7 @@
  */
 package learning.naivebayes;
 
-import learning.titanic.Constants;
+//import learning.titanic.Constants;
 import learning.stats.ProbDist;
 import java.io.IOException;
 import java.util.List;
@@ -17,8 +17,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import learning.titanic.*;
 import learning.util.Utilities;
+
+import org.apache.log4j.*;
 
 /**
  *
@@ -26,15 +27,19 @@ import learning.util.Utilities;
  */
 public class ClassifierTest {
     
-    public static final String LINE_ONE = ",1,0,3,\"Braund, Mr. Owen Harris\",male,22,1,0,A/5 21171,7.25,,S,FALSE";
-    public static final int SURVIVED_COLUMN = 2;
+    //public static final String LINE_ONE = ",1,0,3,\"Braund, Mr. Owen Harris\",male,22,1,0,A/5 21171,7.25,,S,FALSE";
     private Classifier instance;
+    private static Logger logger;
+    
     public ClassifierTest() {
         instance = new Classifier();
     }
     
     @BeforeClass
     public static void setUpClass() {
+        logger = Logger.getLogger("HandRankerTest");
+        logger.addAppender(new ConsoleAppender(new PatternLayout("%m%n")));
+        logger.setLevel(Level.INFO);
     }
     
     @AfterClass
@@ -54,7 +59,7 @@ public class ClassifierTest {
      */
     //@Test
     public void testGetDist() {
-        System.out.println("getDist");
+        logger.info("getDist");
         Classifier instance = new Classifier();
         ProbDist expResult = null;
         ProbDist result = instance.getDist();
@@ -68,7 +73,7 @@ public class ClassifierTest {
      */
     //@Test
     public void testSetDist() {
-        System.out.println("setDist");
+        logger.info("setDist");
         ProbDist<Classification> dist = null;
         Classifier instance = new Classifier();
         instance.setDist(dist);
@@ -79,9 +84,9 @@ public class ClassifierTest {
     /**
      * Test of classify method, of class Classifier.
      */
-    //@Test
+    @Test
     public void testClassify() {
-        System.out.println("\ntesting classify()");
+        logger.info("\ntesting classify()");
         String filename = "naive4.csv";
         Classifier instance = new Classifier();
         //instance.classify(filename);
@@ -92,19 +97,20 @@ public class ClassifierTest {
         t.add("male");
         t.add("FALSE");
         //result = instance.classifyOne(t);
-        //System.out.println(result);
+        //logger.debug(result);
         List<List> list = new ArrayList<List>();
         list.add(t);
-        instance.setDist(new TitanicDistData().getClassificationDist());
-        instance.classify(list);
+        //instance.setDist(new TitanicDistData().getClassificationDist());
+        //instance.classify(list);
+        //TODO:  distributions
     }
     
     /**
      * Test of classifyOne method, of class Classifier.
      */
-    //@Test
+    @Test
     public void testClassifyOneArray() {
-        System.out.println("\ntesting classifyOne(String[] features)");
+        logger.info("\ntesting classifyOne(String[] features)");
         List features = null;
         //Classifier instance = new Classifier();
         Classification expResult = null;
@@ -118,17 +124,17 @@ public class ClassifierTest {
         features.add(false);
         
         result = instance.classifyOne(features);
-        System.out.println(result.getName());
+        logger.debug(result.getName());
         
         String[] s = { "Olivia", "blue", "2", "true"};
-        System.out.println(instance.classifyOne(s));
+        logger.debug(instance.classifyOne(s));
         s = new String[] { "Sean", "yellow", "3", "false" };
-        System.out.println(instance.classifyOne(s));
+        logger.debug(instance.classifyOne(s));
     }
 
-    //@Test
+    @Test
     public void testClassifyOneList() {
-        System.out.println("\ntesting ClassifyOne(List features)");
+        logger.info("\ntesting ClassifyOne(List features)");
         
         ArrayList<String> features = new ArrayList<String>();
         features.add("Olivia");
@@ -136,11 +142,11 @@ public class ClassifierTest {
         features.add("2");
         features.add("true");
         Classification result = instance.classifyOne(features);
-        System.out.println(result);
-        //System.out.println(result.getName());
+        logger.debug(result);
+        //logger.debug(result.getName());
         
         String[] s = { "Olivia", "blue", "2", "true"};
-        System.out.println(instance.classifyOne(s));
+        logger.debug(instance.classifyOne(s));
         
         List f = new ArrayList<String>();
         f.add("Olivia");
@@ -148,11 +154,12 @@ public class ClassifierTest {
         f.add(2);
         f.add(true);
         result = instance.classifyOne(features);
-        System.out.println(result);
+        logger.debug(result);
         result = instance.classifyOne(instance.getAsList(s));
-        System.out.println(result);
+        logger.debug(result);
         
-        instance.setDist(new TitanicDistData().getClassificationDist());
+        //TODO:  supply a distribution
+        /*instance.setDist(new TitanicDistData().getClassificationDist());
         List t = new ArrayList<String>();
         //t.add("0");
         t.add("3");
@@ -160,14 +167,14 @@ public class ClassifierTest {
         //t.add("FALSE");
         t.add("NA");
         result = instance.classifyOne(t);
-        System.out.println(result);
+        logger.debug(result);*/
     }
     /**
      * Test of findProbOfFeatures method, of class Classifier.
      */
-    //@Test
+    @Test
     public void testFindProbOfFeatures() {
-        System.out.println("findProbOfFeatures");
+        logger.info("\ntesting findProbOfFeatures()");
         List features = null;
         Classifier instance = new Classifier();
         double expResult = 0.0;
@@ -182,13 +189,13 @@ public class ClassifierTest {
         attrs.add(false);
         
         result = instance.findProbOfFeatures(attrs);
-        System.out.println(result);
+        logger.debug(result);
         assertEquals(0.0094875, result, 0.0);
     }
     
-    //@Test
+    @Test
     public void testParseOneValue() {
-        System.out.println("\ntesting parseOneValue()");
+        logger.info("\ntesting parseOneValue()");
         Object result = null;
         assertEquals("", Classifier.parseOneValue(null));
         assertEquals(true, Classifier.parseOneValue("true"));

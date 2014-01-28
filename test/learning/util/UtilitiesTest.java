@@ -4,7 +4,6 @@
  */
 package learning.util;
 
-import learning.titanic.TitanicNaiveBayes;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -52,7 +51,7 @@ public class UtilitiesTest {
         System.out.println("\ntesting getCondensedPermutations()");
         int[] input = null;
         input = new int[] { 5, 4, 3, 2, 2 };
-        input = new int[]{  3, 6  };
+        input = new int[]{ 2, 5, 7, 8, 12, 13 };//{  3, 6  };
         List<int[]> result = Utilities.getCondensedPermutations(input);
         if(result == null || result.isEmpty()) {
             fail("returned an empty list");

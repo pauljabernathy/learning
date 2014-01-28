@@ -6,6 +6,7 @@ package learning.naivebayes;
 
 import java.util.List;
 import java.util.ArrayList;
+import org.apache.log4j.*;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -19,11 +20,16 @@ import static org.junit.Assert.*;
  */
 public class ClassificationTest {
     
+    private static Logger logger;
+    
     public ClassificationTest() {
     }
     
     @BeforeClass
     public static void setUpClass() {
+        logger = Logger.getLogger("HandRankerTest");
+        logger.addAppender(new ConsoleAppender(new PatternLayout("%m%n")));
+        logger.setLevel(Level.INFO);
     }
     
     @AfterClass

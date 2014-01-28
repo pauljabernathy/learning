@@ -6,7 +6,6 @@ package learning.util;
 
 import java.util.ArrayList;
 import java.util.List;
-import learning.titanic.TitanicNaiveBayes;
 
 /**
  *
@@ -23,6 +22,16 @@ public class Utilities {
         }
     }
     
+    public static String listToString(List input) {
+        if(input == null || input.isEmpty()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        for(Object current : input) {
+            sb.append(current.toString()).append(" ");
+        }
+        return sb.toString();
+    }
     public static void showArray(int[] a) {
         if(a == null) {
             return;
@@ -55,7 +64,7 @@ public class Utilities {
         int from = (int)Math.pow(2, input.length - 2);
         int to = (int)Math.pow(2, input.length );
         ArrayList<int[]> result = new ArrayList<int[]>();
-        for(int i = 0; i < to; i++) {         
+        for(int i = 1; i < to; i++) {         
             //Utilities.showArray(Utilities.toBinaryArray(i, input.length));
             //Utilities.showArray(Utilities.and(input, Utilities.toBinaryArray(i, input.length)));
             result.add(Utilities.andAndCondense(input, Utilities.toBinaryArray(i, input.length)));

@@ -8,6 +8,8 @@ import learning.stats.ProbDist;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
+import org.apache.log4j.*;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -21,11 +23,16 @@ import static org.junit.Assert.*;
  */
 public class DataGeneratorTest {
     
+    private static Logger logger;
+    
     public DataGeneratorTest() {
     }
     
     @BeforeClass
     public static void setUpClass() {
+        logger = Logger.getLogger("HandRankerTest");
+        logger.addAppender(new ConsoleAppender(new PatternLayout("%m%n")));
+        logger.setLevel(Level.INFO);
     }
     
     @AfterClass
@@ -45,7 +52,7 @@ public class DataGeneratorTest {
      */
     //@Test
     public void testMain() {
-        System.out.println("main");
+        logger.info("main");
         String[] args = null;
         DataGenerator.main(args);
         // TODO review the generated test code and remove the default call to fail.
@@ -57,38 +64,38 @@ public class DataGeneratorTest {
      */
     @Test
     public void testGenerateData() {
-        System.out.println("generateDate");
+        logger.info("generateDate");
         DataGenerator instance = new DataGenerator();
         try {
             instance.generateData(100000, "naive3.csv");
         } catch(IOException e) {
-            System.out.println(e.getClass() + " " + e.getMessage());
+            logger.debug(e.getClass() + " " + e.getMessage());
         }
     }
 
     /**
      * Test of getRandomFeatures method, of class DataGenerator.
      */
-    //@Test
+    @Test
     public void testGetRandomFeatures() {
-        System.out.println("getRandomFeatures");
+        logger.info("getRandomFeatures");
         DataGenerator instance = new DataGenerator();
         List result = null;//instance.getRandomFeatures(null);
         //assertEquals(0, result.size());
         
         ProbDist<String> names = new ProbDist<String>();
-        names.add("Paul", 0.2);
-        names.add("Lora", 0.3);
-        names.add("Olivia", 0.2);
-        names.add("Sean", 0.15);
-        names.add("Shiloh", 0.15);
-        names.display();
+        names.add("Duke", 0.2);
+        names.add("UNC", 0.3);
+        names.add("Wake Forest", 0.2);
+        names.add("NC State", 0.15);
+        names.add("GA Tech", 0.15);
+        logger.debug(names.toString());
         
         ProbDist<String> colors = new ProbDist<String>();
         colors.add("red", .3);
         colors.add("blue", .4);
         colors.add("yellow", .3);
-        colors.display();
+        logger.debug(colors.toString());
         
         List<ProbDist<String>> dists = new ArrayList<ProbDist<String>>();
         dists.add(names);
@@ -103,14 +110,13 @@ public class DataGeneratorTest {
     }
     
     public <T> void showArrayList(List<T> input) {
+        logger.debug("showArrayList()");
         if(input == null) {
             return;
         }
-        //System.out.println("\n");
-        for(int i = 0; i < input.size() - 1; i++) {
-            //System.out.println(i + " " + input.get(i));
-            System.out.print(input.get(i) + " ");
+        for(int i = 0; i < input.size(); i++) {
+            logger.debug(i + " " + input.get(i));
         }
-        System.out.println(input.get(input.size() - 1));
+        logger.debug("");
     }
 }
