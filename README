@@ -1,0 +1,5 @@
+This project is one I created to play with machine learning problems.  Right now the only algorithm implemented is a Naive Bayes Classifier.  
+There are also classes to represent things like a probability distribution and histogram. 
+I have only tried it on one actual application (Titanic Kaggle competition) but so far it seems to work quite well.
+ 
+If you want to use it, it is pretty much the standard open source license.  Feel free to use it and modify it for your application, but if you send it to anyone else please give proper credit.  If you have any improvements to it, please let me know at pauljaberathy@gmail.com.
