@@ -378,6 +378,7 @@ public class ProbDistTest {
         assertEquals(.15, joint.getProbabilities().get(3), .00001);
         assertEquals(.03, joint.getProbabilities().get(4), .00001);
         assertEquals(.12, joint.getProbabilities().get(5), .00001);
+        logger.debug(joint.getEntropy());
     }
     
     @Test

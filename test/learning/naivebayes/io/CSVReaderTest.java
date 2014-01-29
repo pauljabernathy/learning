@@ -57,6 +57,7 @@ public class CSVReaderTest {
     public void testLoadFromFile() {
         logger.info("\ntesting loadFromFile()");
         String filename = "naive4.csv";
+        //filename = "titanic.csv";
         List<List> data = (List<List>)CSVReader.loadFromFile(filename, 10000);
         logger.debug(data.size());
         int count = 0;
@@ -75,7 +76,7 @@ public class CSVReaderTest {
     @Test
     public void testGetDistributions() {
         logger.info("\ntesting getDistributions()");
-        int[] featureColumns = { 2, 5, 13 };
+        int[] featureColumns = { 2, 5, 13 };//{ 2, 5, 13 };
         try {
             ProbDist<Classification> result = CSVReader.getDistributions("titanic.csv", SURVIVED_COLUMN, featureColumns, Constants.DEFAULT_SEPARATOR);
             //result.display();
@@ -128,13 +129,11 @@ public class CSVReaderTest {
         int[] featureColumns = { 2, 5, 13 };
         try {
             List<ProbDist> dists = CSVReader.getFeatureDists("titanic.csv", SURVIVED_COLUMN, "0", featureColumns, Constants.DEFAULT_SEPARATOR);
-            //logger.debug("dists.size() == " + dists.size());
-            //logger.debug("died");
             //Utilities.showList(dists);
-            //assertEquals(.1457, (Double)dists.get(0).getProbabilities().get(1), .0001);
+            assertEquals(.1457, (Double)dists.get(0).getProbabilities().get(1), .0001);
             assertEquals(.1457, dists.get(0).probatilityOf("1"), .0001);
             assertEquals(.8525, dists.get(1).probatilityOf("male"), .001);
-            //logger.debug("survived");
+            
             dists = CSVReader.getFeatureDists("titanic.csv", SURVIVED_COLUMN, "1", featureColumns, Constants.DEFAULT_SEPARATOR);
             //Utilities.showList(dists);
         } catch(Exception e) {

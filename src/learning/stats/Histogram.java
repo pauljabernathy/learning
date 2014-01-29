@@ -89,7 +89,7 @@ public class Histogram {
         //result.setValues(this.values);
         //result.setProbabilities(this.probabilities);
         try {
-            result.setValuesAndProbabilities(values, values);
+            result.setValuesAndProbabilities(this.values, this.probabilities);
         } catch(ProbabilityException e) {
             System.err.println(e.getClass() + " in Histogram.getProbDist():  " + e.getMessage());
         }

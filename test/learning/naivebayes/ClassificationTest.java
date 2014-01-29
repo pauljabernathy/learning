@@ -102,7 +102,7 @@ public class ClassificationTest {
      */
     @Test
     public void testProbabilityOf() {
-        System.out.println("probabilityOf");
+        System.out.println("\ntesting probabilityOf()");
         Classification instance = null;
         List<Classification> classes = DataGenerator.getSamples();
         instance = classes.get(0);
@@ -114,8 +114,8 @@ public class ClassificationTest {
         attrs = new ArrayList();
         assertEquals(0.0, instance.probabilityOf(attrs), 0.0);
         
-        System.out.println("\nPaul red 1 true");
-        attrs.add("Paul");
+        System.out.println("\nDuke red 1 true");
+        attrs.add("Duke");
         attrs.add("red");
         attrs.add(1);
         attrs.add(true);
@@ -124,9 +124,9 @@ public class ClassificationTest {
         assertEquals(0.01335, result, 0.0001);
         System.out.println(classes.get(1).getName() + ":  " + result);
         
-        System.out.println("\nPaul false 1 true");
+        System.out.println("\nTiger false 1 true");
         attrs = new ArrayList();
-        attrs.add("Paul");
+        attrs.add("Tiger");
         attrs.add(false);
         attrs.add(1);
         attrs.add(true);
@@ -134,9 +134,9 @@ public class ClassificationTest {
         System.out.println(result);
         assertEquals(0.0, result, 0.0);
         
-        System.out.println("\nLora blue 2 true");
+        System.out.println("\nUNC blue 2 true");
         attrs = new ArrayList();
-        attrs.add("Lora");
+        attrs.add("UNC");
         attrs.add("blue");
         attrs.add(2);
         attrs.add(false);
