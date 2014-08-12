@@ -24,7 +24,8 @@ public class TitanicNeural {
     public static void main(String[] args) {
         TitanicNeural tn = new TitanicNeural();
         try {
-            tn.doTwoLayerAnalysis("titanic.csv");
+            //tn.doTwoLayerAnalysis("titanic.csv");
+            tn.doThreeLayerAnalysis("titanic.csv");
         } catch(IOException e) {
             System.out.println(e.getClass() + " " + e.getMessage());
         }
@@ -38,13 +39,14 @@ public class TitanicNeural {
         //List<List<String>> columns = CSVReader.getColumns(filename, new int[] { 0, 1, 2, 5, 7, 8, 12, 13 }, ",");
         List<List<String>> rows = CSVReader.getRowsAsLists(filename, new int[] { 1, 2, 5, 6, 7, 8, 10, 12, 13 }, 900);
         DoubleGenome bestGenome = new DoubleGenome(14);
+        bestGenome.generateRandom();
         logger.debug(bestGenome.getRawData());
         //DoubleGenome previous = bestGenome.clone();
         
         Neuron[][] network = this.getTwoLayerNetwork(bestGenome);
         
-        int numRuns = 1500;
-        int currentNumCorrect = doOneTwoLayerRun(rows, network);
+        int numRuns = 1000;
+        int currentNumCorrect = doOneRun(rows, network);
         int bestNumCorrect = currentNumCorrect;
         logger.info("numCorrect = " + currentNumCorrect);
         DoubleGenome copy = bestGenome.clone();
@@ -53,10 +55,10 @@ public class TitanicNeural {
                 logger.info(i);
             }
             List<Double> mutated = bestGenome.mutate();
-            logger.debug(mutated);
+            logger.debug("genome is " + mutated);
             copy.setRawData(mutated);
             network = this.getTwoLayerNetwork(copy);
-            currentNumCorrect = doOneTwoLayerRun(rows, network);
+            currentNumCorrect = doOneRun(rows, network);
             logger.info("numCorrect = " + currentNumCorrect);
             if(currentNumCorrect > bestNumCorrect) {
                 bestNumCorrect = currentNumCorrect;
@@ -65,10 +67,55 @@ public class TitanicNeural {
                 copy = bestGenome.clone();
             }
         }
-        logger.info("best was " + ListArrayUtil.listToString(bestGenome.getRawData()) + " with " + bestNumCorrect + " correct.");
+        logger.info("best was " +  bestNumCorrect + " (" + (double)(bestNumCorrect * 100.0) / (double) rows.size() + "%) correct with " + ListArrayUtil.listToString(bestGenome.getRawData()));
     }
     
-    protected int doOneTwoLayerRun(List<List<String>> rows, Neuron[][] network) {
+    public void doThreeLayerAnalysis(String filename) throws IOException {
+        //List<List<String>> columns = CSVReader.getColumns(filename, new int[] { 0, 1, 2, 5, 7, 8, 12, 13 }, ",");
+        List<List<String>> rows = CSVReader.getRowsAsLists(filename, new int[] { 1, 2, 5, 6, 7, 8, 10, 12, 13 }, 900);
+        //DoubleGenome bestGenome = new DoubleGenome(42);
+        DoubleGenome bestGenome = new DoubleGenome(300);
+        bestGenome.generateRandom();
+        logger.debug(bestGenome.getRawData());
+        //DoubleGenome previous = bestGenome.clone();
+        
+        //Neuron[][] network = this.getThreeLayerNetwork(bestGenome);
+        Neuron[][] network = this.getThreeLayerNetwork2(bestGenome, 20);
+        for(int j = 0; j < network.length; j++) {
+            for(int k = 0; k < network[j].length; k++) {
+                network[j][k].setOutput(Neuron.INACTIVE);
+            }
+        }
+        
+        int numRuns = 3000;
+        int currentNumCorrect = doOneRun(rows, network);
+        int bestNumCorrect = currentNumCorrect;
+        logger.debug("numCorrect = " + currentNumCorrect);
+        DoubleGenome copy = bestGenome.clone();
+        for(int i = 0; i < numRuns; i++) {
+            if(i % 1000 == 0) {
+                logger.info(i);
+                logger.info("best num correct = " + bestNumCorrect);
+            }
+            List<Double> mutated = bestGenome.mutate();
+            logger.debug("genome is " + mutated);
+            copy.setRawData(mutated);
+            network = this.getThreeLayerNetwork(copy);
+            currentNumCorrect = doOneRun(rows, network);
+            logger.debug("numCorrect = " + currentNumCorrect);
+            if(currentNumCorrect > bestNumCorrect) {
+                bestNumCorrect = currentNumCorrect;
+                logger.debug("use mutated genome");
+                bestGenome.setRawData(mutated);
+                copy = bestGenome.clone();
+            }
+        }
+        logger.info("best was " +  bestNumCorrect + " (" + (double)(bestNumCorrect * 100.0) / (double) rows.size() + "%) correct with " + ListArrayUtil.listToString(bestGenome.getRawData()));
+        logger.setLevel(Level.DEBUG);
+        this.doOneRun(rows, this.getThreeLayerNetwork(bestGenome));
+    }
+    
+    protected int doOneRun(List<List<String>> rows, Neuron[][] network) {
         int survived;
         int pclass;
         String sex;
@@ -84,16 +131,6 @@ public class TitanicNeural {
         //for(List<String> row : rows) {
         for(int i = 0; i < rows.size(); i++) {
             //first, reset neurons to inactive
-            /*for(Neuron n : network[0]) {
-                n.setOutput(Neuron.INACTIVE);
-            }
-            //logger.debug();
-            for(Neuron n : network[1]) {
-                n.setOutput(Neuron.INACTIVE);
-            }
-            for(Neuron n : network[2]) {
-                n.setOutput(Neuron.INACTIVE);
-            }*/
             for(int j = 0; j < network.length; j++) {
                 for(int k = 0; k < network[j].length; k++) {
                     network[j][k].setOutput(Neuron.INACTIVE);
@@ -147,28 +184,19 @@ public class TitanicNeural {
                     network[0][13].setOutput(Neuron.ACTIVE);
                 }
                 
-                /**/StringBuilder sb = new StringBuilder("");
-                for(Neuron n : network[0]) {
-                    //System.out.print(n.getCachedOutput() + "\t");
-                    sb.append(n.getCachedOutput()).append("\t");
+                StringBuilder sb = new StringBuilder("");
+                for(int j = 1; j < network.length; j++) {
+                    sb = new StringBuilder("");
+                    for(int k = 0; k < network[j].length; k++) {
+                        network[j][k].calculateOutput();
+                        sb.append(network[j][k].getCachedOutput()).append("\t");
+                    }
+                    logger.debug("output for network[" + j + "][] is " + sb);
                 }
-                logger.debug(sb);
                 sb = new StringBuilder("");
-                for(Neuron n : network[1]) {
-                    n.calculateOutput();
-                    //System.out.print(n.getCachedOutput() + "\t");
-                    sb.append(n.getCachedOutput()).append("\t");
-                }
-                logger.debug(sb);
-                sb = new StringBuilder();
-                for(Neuron n : network[2]) {
-                    n.calculateOutput();
-                    logger.debug("output is " + n.getCachedOutput());
-                    sb.append(n.getCachedOutput()).append("\t");
-                }
-                logger.debug(sb);/**/
-                if((int)(network[2][0].getCachedOutput()) == survived) {
-                //if((int)(network[network.length - 1][0].getCachedOutput()) == survived) {
+                //if((int)(network[2][0].getCachedOutput()) == survived) {
+                if((int)(network[network.length - 1][0].getCachedOutput()) == survived) {
+                //if((int)(network[3][0].getCachedOutput()) == survived) {
                     logger.debug("was correct");
                     numCorrect++;
                 }
@@ -210,6 +238,11 @@ public class TitanicNeural {
     }
     
     public Neuron[][] getThreeLayerNetwork(DoubleGenome weights) {
+        return getThreeLayerNetwork1(weights);
+    }
+    
+    //This one seems to work worse than the two layer network and is worse than guessing all deaths and sometimes worse than random guessing.
+    public Neuron[][] getThreeLayerNetwork1(DoubleGenome weights) {
         Neuron[][] network = new Neuron[4][];
         Neuron[][] inputs = this.getSensorsAndFirstLayer();
         network[0] = inputs[0];
@@ -318,7 +351,7 @@ public class TitanicNeural {
         output.addInput(hidden11, weights.get(39));
         output.addInput(hidden12, weights.get(40));
         output.addInput(hidden13, weights.get(41));
-        output.addInput(hidden14, weights.get(42));
+        /*output.addInput(hidden14, weights.get(42));
         output.addInput(hidden15, weights.get(43));
         output.addInput(hidden16, weights.get(44));
         output.addInput(hidden17, weights.get(45));
@@ -331,9 +364,35 @@ public class TitanicNeural {
         output.addInput(hidden24, weights.get(52));
         output.addInput(hidden25, weights.get(53));
         output.addInput(hidden26, weights.get(54));
-        output.addInput(hidden27, weights.get(55));
+        output.addInput(hidden27, weights.get(55));*/
         
         network[3] = new Neuron[1];
+        network[3][0] = output;
+        return network;
+    }
+    //TODO:  how to handle weights that is two small?
+    public Neuron[][] getThreeLayerNetwork2(DoubleGenome weights, int hiddenLayerSize) {
+        Neuron[][] network = new Neuron[4][];
+        Neuron[][] inputs = this.getSensorsAndFirstLayer();
+        network[0] = inputs[0];
+        network[1] = inputs[1];
+        network[2] = new Neuron[hiddenLayerSize];
+        network[3] = new Neuron[1];
+        
+        for(int j = 0; j < hiddenLayerSize; j++) {
+            network[2][j] = new Neuron();
+        }
+        for(int i = 0; i < inputs[1].length; i++) {
+            for(int j = 0; j < hiddenLayerSize; j++) {
+                network[2][j].addInput(network[1][i], weights.get(i * (hiddenLayerSize) + j));
+            }
+        }
+        
+        Neuron output = new Neuron();
+        int start = inputs[1].length * hiddenLayerSize;
+        for(int j = 0; j < hiddenLayerSize; j++) {
+            output.addInput(network[2][j], weights.get(start + j));
+        }
         network[3][0] = output;
         return network;
     }
@@ -419,6 +478,90 @@ public class TitanicNeural {
         Neuron[][] network = new Neuron[2][13];
         network[0] = sensors;
         network[1] = firstLayer;
+        return network;
+    }
+    
+    public Neuron[][] initializeInputs(List<String> row, Neuron[][] network) throws NumberFormatException {
+        if(network == null) {
+            return new Neuron[0][];
+        } else if(row == null) {
+            network = resetNetwork(network);
+            return network;
+        }
+        
+        int survived;
+        int pclass;
+        String sex;
+        int age;
+        int sibsp;
+        int parch;
+        double fare;
+        String port;
+        boolean isChild;
+        
+        survived = Integer.parseInt(row.get(0));
+        pclass = Integer.parseInt(row.get(1));
+        sex = row.get(2);
+        age = Integer.parseInt(row.get(3));
+        sibsp = Integer.parseInt(row.get(4));
+        parch = Integer.parseInt(row.get(5));
+        fare = Double.parseDouble(row.get(6));
+        port = row.get(7);
+        isChild = Boolean.parseBoolean(row.get(8));
+        String sep = "\t";
+        logger.debug(pclass + sep + sep + sep + sex + sep + sep + age + sep + sibsp + sep + parch + sep + fare + sep + port + sep + sep + sep + isChild + sep + sep + " -> " + survived);
+
+        switch(pclass) {
+            case 1:
+                network[0][0].setOutput(Neuron.ACTIVE);
+                break;
+            case 2:
+                network[0][1].setOutput(Neuron.ACTIVE);
+                break;
+            case 3:
+                network[0][2].setOutput(Neuron.ACTIVE);
+                break;
+        }
+        if("male".equals(sex)) {
+            network[0][3].setOutput(Neuron.ACTIVE);
+        } else if("female".equals(sex)) {
+            network[0][4].setOutput(Neuron.ACTIVE);
+        }
+        network[0][5].setOutput((double)age / 100.0);
+        network[0][6].setOutput((double)sibsp / 10.0);
+        network[0][7].setOutput((double)parch / 10.0);
+        network[0][8].setOutput(fare / 200.0);
+        if("S".equals(port)) {
+            network[0][9].setOutput(Neuron.ACTIVE);
+        } else if("Q".equals(port)) {
+            network[0][10].setOutput(Neuron.ACTIVE);
+        } else if("C".equals(port)) {
+            network[0][11].setOutput(Neuron.ACTIVE);
+        }
+        if(isChild) {
+            network[0][12].setOutput(Neuron.ACTIVE);
+        } else {
+            network[0][13].setOutput(Neuron.ACTIVE);
+        }
+        
+        for(int j = 1; j < network.length; j++) {
+            for(int k = 0; k < network[j].length; k++) {
+                network[j][k].calculateOutput();
+            }
+        }
+        
+        return network;
+    }
+    
+    public Neuron[][] resetNetwork(Neuron[][] network) {
+        if(network == null) {
+            return new Neuron[0][0];
+        }
+        for(int j = 0; j < network.length; j++) {
+            for(int k = 0; k < network[j].length; k++) {
+                network[j][k].setOutput(Neuron.INACTIVE);
+            }
+        }
         return network;
     }
 }
