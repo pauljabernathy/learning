@@ -265,6 +265,52 @@ public class DoubleGenomeTest {
     }
     
     @Test
+    public void testDoMultiplePointValueChangeMutation() {
+        logger.info("\ntesting doMultiplePointValueChangeMutation()");
+        int size = 40;
+        DoubleGenome instance = new DoubleGenome(size);
+        //double[] nums = null;
+        
+        //nums = new double[size];
+        List<Double> input = null;
+        List<Double> mutated = null;
+        instance.setRawData(input);
+        mutated = instance.doMultiplePointValueChangeMutation();
+        if(mutated == null) {
+            fail("mutated was null");
+        }
+        assertEquals(size, mutated.size());
+        assertEquals(false, ListArrayUtil.haveSameElements(input, mutated));
+        
+        input = new ArrayList<Double>();
+        mutated = instance.doMultiplePointValueChangeMutation();
+        if(mutated == null) {
+            fail("mutated was null");
+        }
+        assertEquals(size, mutated.size());
+        assertEquals(false, ListArrayUtil.haveSameElements(input, mutated));
+        
+        //now with actual data in the genome
+        for(int i = 0; i < size; i++) {
+            //nums[i] = (double)i;
+            input.add((double)i);
+        }
+        instance.setRawData(input);
+        mutated = instance.doMultiplePointValueChangeMutation();
+        logger.debug(ListArrayUtil.listToString(input));
+        logger.debug(ListArrayUtil.listToString(mutated));
+        assertEquals(size, mutated.size());
+        assertEquals(false, ListArrayUtil.haveSameElements(input, mutated));
+        int numDiffs = 0;
+        for(int i = 0; i < mutated.size(); i++) {
+            if(!mutated.get(i).equals(input.get(i))) {
+                numDiffs++;
+            }
+        }
+        assertEquals(8, numDiffs);
+    }
+    
+    @Test
     public void testDoSwapMutation() {
         logger.info("\ntesting doSwapMutation()");
         int size = 40;
@@ -305,13 +351,14 @@ public class DoubleGenomeTest {
             }
         }
         assertEquals(2, numDiffs);
+        //mutated.set(40, 2.0);
     }
     //TODO:  test swap and reversal on sizes of 2 or less
     //TODO:  test with odd genome length
     @Test
     public void testDoGroupReversalMutation() {
         logger.info("\ntesting doGroupReveralMutation()");
-        int size = 40;
+        int size = 10;
         DoubleGenome instance = new DoubleGenome(size);
         List<Double> input = null;
         List<Double> mutated = null;
@@ -354,6 +401,62 @@ public class DoubleGenomeTest {
     }
     
     @Test
+    public void testDoGroupReversalMutation_List_int_int() {
+        logger.info("\ntesting doGroupReversalMutation(List<Double> genome, int first, int last)");
+        int size = 10;
+        //DoubleGenome instance = new DoubleGenome(size);
+        List<Double> input = null;
+        List<Double> mutated = null;
+        //instance.setRawData(input);
+        mutated = DoubleGenome.doGroupReversalMutation(null, 0, 1);
+        if(mutated == null) {
+            fail("mutated was null");
+        }
+        assertEquals(0, mutated.size());
+        assertEquals(false, ListArrayUtil.haveSameElements(input, mutated));
+        
+        input = new ArrayList<Double>();
+        mutated = DoubleGenome.doGroupReversalMutation(input, 0, 1);
+        if(mutated == null) {
+            fail("mutated was null");
+        }
+        assertEquals(0, mutated.size());
+        assertEquals(true, ListArrayUtil.haveSameElements(input, mutated));
+        
+        //now with actual data in the genome
+        for(int i = 0; i < size; i++) {
+            //nums[i] = (double)i;
+            input.add((double)i);
+        }
+        mutated = DoubleGenome.doGroupReversalMutation(input, 4, 4);
+        assertEquals(0, findNumDiffs(mutated, input));
+        mutated = DoubleGenome.doGroupReversalMutation(input, 15, 15);
+        assertEquals(0, findNumDiffs(mutated, input));
+        assertEquals(true, ListArrayUtil.haveSameElements(mutated, input));
+        
+        mutated = DoubleGenome.doGroupReversalMutation(input, 4, 8);
+        logger.debug(ListArrayUtil.listToString(input));
+        logger.debug(ListArrayUtil.listToString(mutated));
+        assertEquals(size, mutated.size());
+        assertEquals(false, ListArrayUtil.haveSameElements(input, mutated));
+        assertEquals(4, findNumDiffs(mutated, input));
+        
+        mutated = DoubleGenome.doGroupReversalMutation(input, 8, 4);
+        logger.debug(ListArrayUtil.listToString(input));
+        logger.debug(ListArrayUtil.listToString(mutated));
+        assertEquals(size, mutated.size());
+        assertEquals(false, ListArrayUtil.haveSameElements(input, mutated));
+        assertEquals(4, findNumDiffs(mutated, input));
+        
+        mutated = DoubleGenome.doGroupReversalMutation(input, 9, 8);
+        logger.debug(ListArrayUtil.listToString(input));
+        logger.debug(ListArrayUtil.listToString(mutated));
+        assertEquals(size, mutated.size());
+        assertEquals(false, ListArrayUtil.haveSameElements(input, mutated));
+        assertEquals(2, findNumDiffs(mutated, input));
+    }
+    
+    @Test
     public void testClone() {
         logger.info("\ntesting clone()");
         int size = 40;
@@ -383,22 +486,23 @@ public class DoubleGenomeTest {
         assertEquals(false, ListArrayUtil.haveSameElements(copy.getRawData(), instance.getRawData()));
     }
     
-    //TODO:  move to toolbox
-    private boolean haveSameElements(double[] left, double[] right) {
-        //if one is null but the other is not, they are different
-        if((left == null && right != null) || (left != null && right == null)) {
-            return false;
-        }
-        //if they are different sizes, they are different
-        if(left.length != right.length) {
-            return false;
-        }
-        for(int i = 0; i < left.length; i++) {
-            if(left[i] != right[i]) {
-                return false;
+    private int findNumDiffs(List<Double> a, List<Double> b) {
+        int numDiffs = 0;
+        for(int i = 0; i < a.size() && i < b.size(); i++) {
+            if(a.get(i) != b.get(i)) {
+                numDiffs++;
             }
         }
-        return true;
+        if(a.size() < b.size()) {
+            for(int i = a.size(); i < b.size(); i++) {
+                numDiffs++;
+            }
+        } else if(a.size() > b.size()) {
+            for(int i = b.size(); i < a.size(); i++) {
+                numDiffs++;
+            }
+        }
+        return numDiffs;
     }
     
 }

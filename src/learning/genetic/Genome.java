@@ -44,9 +44,10 @@ public abstract class Genome {
     protected Genome() {
         this.genome = new ArrayList();
         this.mutationProbs = new ProbDist<MutationType>();
-        this.mutationProbs.add(MutationType.POINT_VALUE_CHANGE, .4);
+        this.mutationProbs.add(MutationType.POINT_VALUE_CHANGE, .25);
+        this.mutationProbs.add(MutationType.MULTIPLE_POINT_VALUE_CHANGE, .35);
         this.mutationProbs.add(MutationType.POINT_DELETION, 0.0);   //let's not deal with changing the length just yet...
-        this.mutationProbs.add(MutationType.SWAP, .4);
+        this.mutationProbs.add(MutationType.SWAP, .2);
         this.mutationProbs.add(MutationType.GROUP_REVERSAL, .2);
     }
     public int getSize() {

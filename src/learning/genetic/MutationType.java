@@ -10,5 +10,5 @@ package learning.genetic;
  */
 public enum MutationType {
     //Point("point"), SWAP("swap"), GROUP_REVERSAL("group reversal");
-    POINT_VALUE_CHANGE, POINT_DELETION, SWAP, GROUP_REVERSAL;
+    POINT_VALUE_CHANGE, MULTIPLE_POINT_VALUE_CHANGE, POINT_DELETION, SWAP, GROUP_REVERSAL;
 }

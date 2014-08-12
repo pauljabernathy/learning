@@ -24,7 +24,13 @@ public class DoubleGenome extends Genome {
         for(int i = 0; i < size; i++) {
             super.genome.add(0.0);
         }
-        this.maxRandomValue = 10.0;
+        this.maxRandomValue = .8;
+    }
+    
+    public void generateRandom() {
+        for(int i = 0; i < super.genome.size(); i++) {
+            super.genome.set(i, Math.random());
+        }
     }
     
     public Double get(int index) {
@@ -95,16 +101,9 @@ public class DoubleGenome extends Genome {
             //int index = (int)(Math.random() * super.getSize());
             //mutated.set(index, toolbox.random.Random.getUniformDoubles(1, this.minRandomValue, this.maxRandomValue)[0]);
             mutated = this.doPointChangeMutation();
+        } else if(m == MutationType.MULTIPLE_POINT_VALUE_CHANGE) {
+            mutated = this.doMultiplePointValueChangeMutation();
         } else if(m == MutationType.SWAP) {
-            /*try {
-                List<Integer> indeces = toolbox.random.Random.sample(MathUtil.seqInteger(0, super.genome.size()), 2, false);
-                double temp = mutated.get(indeces.get(0));
-                mutated.set(indeces.get(0), mutated.get(indeces.get(1)));
-                mutated.set(indeces.get(1), temp);
-            } catch(Exception e) {
-                //should only get here if the size of the genome is less than 2...
-                //TODO:  handle exception
-            }*/
             mutated = this.doSwapMutation();
         } else if(m == MutationType.GROUP_REVERSAL) {
             mutated = this.doGroupReversalMutation();
@@ -122,53 +121,95 @@ public class DoubleGenome extends Genome {
         return mutated;
     }
     
+    protected List<Double> doMultiplePointValueChangeMutation() {
+        List<Double> mutated = new ArrayList<Double>();
+        for(int i = 0; i < super.genome.size(); i++) {
+            mutated.add((Double)super.genome.get(i));
+        }
+        List<Integer> indecesChanged = new ArrayList<Integer>();
+        for(int i = 0; i < super.genome.size() / 5; i++) {
+            int index = (int)(Math.random() * super.getSize());
+            while(indecesChanged.contains(index)) {
+                index = (int)(Math.random() * super.getSize());
+            }
+            //TODO:  maybe a loop counter here...
+            double newValue = toolbox.random.Random.getUniformDoubles(1, this.minRandomValue, this.maxRandomValue)[0];
+            while(newValue == mutated.get(index)) {
+                newValue = toolbox.random.Random.getUniformDoubles(1, this.minRandomValue, this.maxRandomValue)[0];
+            }
+            mutated.set(index, newValue);
+            indecesChanged.add(index);
+        }
+        return mutated;
+    }
+    
     protected List<Double> doSwapMutation() {
         List<Double> mutated = new ArrayList<Double>();
         for(int i = 0; i < super.genome.size(); i++) {
             mutated.add((Double)super.genome.get(i));
         }
         try {
-            List<Integer> indeces = toolbox.random.Random.sample(MathUtil.seqInteger(0, super.genome.size()), 2, false);
+            List<Integer> indeces = toolbox.random.Random.sample(MathUtil.seqInteger(0, super.genome.size() - 1), 2, false);
             double temp = mutated.get(indeces.get(0));
             mutated.set(indeces.get(0), mutated.get(indeces.get(1)));
             mutated.set(indeces.get(1), temp);
         } catch(Exception e) {
             //should only get here if the size of the genome is less than 2...
             //TODO:  handle exception
+            e.printStackTrace();
+        }
+        return mutated;
+    }
+    //TODO:  debug defect of occasionally not performing a swap
+    protected List<Double> doGroupReversalMutation() {
+        List<Double> mutated = new ArrayList<Double>();
+        if(super.genome == null || super.genome.size() < 2) {
+            return mutated;
+        }
+        
+        try {
+            List<Integer> indeces = toolbox.random.Random.sample(MathUtil.seqInteger(0, super.genome.size() - 1), 2, false);
+            mutated = DoubleGenome.doGroupReversalMutation(genome, indeces.get(0), indeces.get(1));
+        } catch(Exception e) {
+            //should only get here if the size of the genome is less than 2...
+            //TODO:  handle exception
+            e.printStackTrace();
         }
         return mutated;
     }
     
-    protected List<Double> doGroupReversalMutation() {
+    protected static List<Double> doGroupReversalMutation(List<Double> genome, int first, int last) {
+        //System.out.println("doGroupReversal(genome, " + first + ", " + last + ")");
+        if(genome == null || genome.size() == 0) {
+            return new ArrayList<Double>();
+        }
+        if(genome.size() == 1) {
+            return genome;
+        }
         List<Double> mutated = new ArrayList<Double>();
-        for(int i = 0; i < super.genome.size(); i++) {
-            mutated.add((Double)super.genome.get(i));
+        for(int i = 0; i < genome.size(); i++) {
+            mutated.add(genome.get(i));
         }
         
-        try {
-            List<Integer> indeces = toolbox.random.Random.sample(MathUtil.seqInteger(0, super.genome.size()), 2, false);
-            int start = 0;
-            int stop = 0;
-            if(indeces.get(0) < indeces.get(1)) {
-                start = indeces.get(0);
-                stop = indeces.get(1);
-            } else {
-                stop = indeces.get(0);
-                start = indeces.get(1);
-            }
-            Double temp;
-            int swap1 = start;
-            int swap2 = stop - 1;
-            while(swap1 < swap2) {
-                temp = mutated.get(swap1);
-                mutated.set(swap1, mutated.get(swap2));
-                mutated.set(swap2, temp);
-                swap1++;
-                swap2--;
-            }
-        } catch(Exception e) {
-            //should only get here if the size of the genome is less than 2...
-            //TODO:  handle exception
+        int start = 0;
+        int stop = 0;
+        if(first < last) {
+            start = first;
+            stop = last;
+        } else {
+            stop = first;
+            start = last;
+        }
+        Double temp;
+        int swap1 = start;
+        int swap2 = stop;
+        //System.out.println("swap1 = " + swap1 + ";  swap2 = " + swap2);
+        while(swap1 < swap2) {
+            temp = mutated.get(swap1);
+            mutated.set(swap1, mutated.get(swap2));
+            mutated.set(swap2, temp);
+            swap1++;
+            swap2--;
         }
         return mutated;
     }
