@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 import org.apache.log4j.*;
 import toolbox.util.ListArrayUtil;
+import toolbox.util.MathUtil;
 
 /**
  *
@@ -46,7 +47,7 @@ public class TitanicNeural {
         Neuron[][] network = this.getTwoLayerNetwork(bestGenome);
         
         int numRuns = 1000;
-        int currentNumCorrect = doOneRun(rows, network);
+        int currentNumCorrect = MathUtil.sum(doOneRun(rows, network));
         int bestNumCorrect = currentNumCorrect;
         logger.info("numCorrect = " + currentNumCorrect);
         DoubleGenome copy = bestGenome.clone();
@@ -58,7 +59,7 @@ public class TitanicNeural {
             logger.debug("genome is " + mutated);
             copy.setRawData(mutated);
             network = this.getTwoLayerNetwork(copy);
-            currentNumCorrect = doOneRun(rows, network);
+            currentNumCorrect = MathUtil.sum(doOneRun(rows, network));
             logger.info("numCorrect = " + currentNumCorrect);
             if(currentNumCorrect > bestNumCorrect) {
                 bestNumCorrect = currentNumCorrect;
@@ -73,6 +74,7 @@ public class TitanicNeural {
     public void doThreeLayerAnalysis(String filename) throws IOException {
         //List<List<String>> columns = CSVReader.getColumns(filename, new int[] { 0, 1, 2, 5, 7, 8, 12, 13 }, ",");
         List<List<String>> rows = CSVReader.getRowsAsLists(filename, new int[] { 1, 2, 5, 6, 7, 8, 10, 12, 13 }, 900);
+        logger.info("rows.size() == " + rows.size());
         //DoubleGenome bestGenome = new DoubleGenome(42);
         DoubleGenome bestGenome = new DoubleGenome(300);
         bestGenome.generateRandom();
@@ -87,8 +89,8 @@ public class TitanicNeural {
             }
         }
         
-        int numRuns = 3000;
-        int currentNumCorrect = doOneRun(rows, network);
+        int numRuns = 1000;
+        int currentNumCorrect = MathUtil.sum(doOneRun(rows, network));
         int bestNumCorrect = currentNumCorrect;
         logger.debug("numCorrect = " + currentNumCorrect);
         DoubleGenome copy = bestGenome.clone();
@@ -101,7 +103,7 @@ public class TitanicNeural {
             logger.debug("genome is " + mutated);
             copy.setRawData(mutated);
             network = this.getThreeLayerNetwork(copy);
-            currentNumCorrect = doOneRun(rows, network);
+            currentNumCorrect = MathUtil.sum(doOneRun(rows, network));
             logger.debug("numCorrect = " + currentNumCorrect);
             if(currentNumCorrect > bestNumCorrect) {
                 bestNumCorrect = currentNumCorrect;
@@ -111,11 +113,46 @@ public class TitanicNeural {
             }
         }
         logger.info("best was " +  bestNumCorrect + " (" + (double)(bestNumCorrect * 100.0) / (double) rows.size() + "%) correct with " + ListArrayUtil.listToString(bestGenome.getRawData()));
+        int[] record = this.doOneRun(rows, this.getThreeLayerNetwork(bestGenome));
+        logger.info("rows.size() == " + rows.size());
         logger.setLevel(Level.DEBUG);
-        this.doOneRun(rows, this.getThreeLayerNetwork(bestGenome));
+        //this.doOneRun(rows, this.getThreeLayerNetwork(bestGenome));
+        int passengerId;
+        int survived;
+        int pclass;
+        String sex;
+        int age;
+        int sibsp;
+        int parch;
+        double fare;
+        String port;
+        boolean isChild;
+        String sep = ",";
+        List<String> row = null;
+        logger.debug("passengerid" + sep + "guess" + sep + "survived" + sep + "pclass" + sep + "sex" + sep + "age" + sep + "sibsp" + sep + "parch" + sep + "fare" + sep + "port" + sep + "isChild");
+        for(int i = 0; i < rows.size(); i++) {
+            row = rows.get(i);
+            try {
+                survived = Integer.parseInt(row.get(0));
+                pclass = Integer.parseInt(row.get(1));
+                sex = row.get(2);
+                age = Integer.parseInt(row.get(3));
+                sibsp = Integer.parseInt(row.get(4));
+                parch = Integer.parseInt(row.get(5));
+                fare = Double.parseDouble(row.get(6));
+                port = row.get(7);
+                isChild = Boolean.parseBoolean(row.get(8));
+                //logger.debug(record[i] + sep + survived + sep + pclass + sep + sep + sep + sex + sep + sep + age + sep + sibsp + sep + parch + sep + fare + sep + port + sep + sep + sep + isChild);
+                logger.debug(i+1 + sep + record[i] + sep + survived + sep + pclass + sep + sex + sep + age + sep + sibsp + sep + parch + sep + fare + sep + port + sep + isChild);
+            } catch(NumberFormatException e) {
+                //for now, just go on the the next row I guess
+                //TODO:  handle
+                logger.error(e.getClass() + " at " + i + ":  " + e.getMessage());
+            }
+        }
     }
     
-    protected int doOneRun(List<List<String>> rows, Neuron[][] network) {
+    protected int[] doOneRun(List<List<String>> rows, Neuron[][] network) {
         int survived;
         int pclass;
         String sex;
@@ -128,14 +165,11 @@ public class TitanicNeural {
         
         String sep = "\t";
         int numCorrect = 0;
+        int[] record = new int[rows.size()];
         //for(List<String> row : rows) {
         for(int i = 0; i < rows.size(); i++) {
             //first, reset neurons to inactive
-            for(int j = 0; j < network.length; j++) {
-                for(int k = 0; k < network[j].length; k++) {
-                    network[j][k].setOutput(Neuron.INACTIVE);
-                }
-            }
+            this.resetNetwork(network);
             
             //now, go through the rows
             List<String> row = rows.get(i);
@@ -199,13 +233,14 @@ public class TitanicNeural {
                 //if((int)(network[3][0].getCachedOutput()) == survived) {
                     logger.debug("was correct");
                     numCorrect++;
+                    record[i] = 1;
                 }
             } catch(NumberFormatException e) {
                 //for now, just go on the the next row I guess
                 //TODO:  handle
             }
         }
-        return numCorrect;
+        return record;
     }
     
     //TODO: check length of weights
