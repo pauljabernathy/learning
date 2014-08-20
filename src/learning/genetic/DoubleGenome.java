@@ -20,7 +20,7 @@ public class DoubleGenome extends Genome {
     private double maxRandomValue;
     public DoubleGenome(int size) {
         super();
-        super.genome = new ArrayList<Double>(size);
+        super.genome = new ArrayList<Double>();
         for(int i = 0; i < size; i++) {
             super.genome.add(0.0);
         }

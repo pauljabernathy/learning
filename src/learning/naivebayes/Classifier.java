@@ -96,11 +96,11 @@ public class Classifier {
         int highestProbIndex = 0;
         double highestProb = 0.0;
         Classification mostLikely = new Classification("unknown");
-        for(int i = 0; i < dist.getValues().size(); i++) {
-            Classification currentClass = dist.getValues().get(i);
+        for(int i = 0; i < this.dist.getValues().size(); i++) {
+            Classification currentClass = this.dist.getValues().get(i);
             pFgivenC = currentClass.probabilityOf(features);
             logger.debug(pFgivenC);
-            pC = dist.getProbabilities().get(i);
+            pC = this.dist.getProbabilities().get(i);
             pCgivenF = pFgivenC * pC / pF;
             if(pCgivenF > highestProb) {
                 highestProb = pCgivenF;

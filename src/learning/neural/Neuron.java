@@ -80,7 +80,7 @@ public class Neuron {
     }
     
     //TODO:  create sensor class and move this there
-    protected void setOutput(double output) {
+    public void setOutput(double output) {
         this.output = output;
     }
     
