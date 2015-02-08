@@ -194,4 +194,32 @@ public class Utilities {
         }
         return result;
     }
+    
+    public static int[] or(int[] left, int[] right) {
+        if((left == null || left.length == 0) && (right == null || right.length == 0)) {
+                return new int[0];
+        }
+        int length = (left.length > right.length)?left.length:right.length;
+        System.out.println("length should be " + length);
+        int[] result = new int[length];
+        int[] temp = new int[length];
+        if(left.length < length) {
+                for(int i = length - left.length; i < length; i++) {
+                        temp[i] = left[i - (right.length - left.length)];
+                }
+                left = temp;
+        } else {
+                for(int i = length - right.length; i < length; i++) {
+                        temp[i] = right[i - (left.length - right.length)];
+                }
+                right = temp;
+        }
+
+        for(int i = 0; i < length; i++) {
+                if(left[i] > 0 || right[i] > 0) {
+                        result[i] = 1;
+                }
+        }
+        return result;
+    }
 }

@@ -15,6 +15,10 @@ import learning.naivebayes.Classification;
 import learning.naivebayes.Classifier;
 import learning.stats.Histogram;
 import learning.stats.ProbDist;
+import toolbox.information.Shannon;
+
+//import toolbox.stats.DataList;
+import toolbox.stats.*;
 
 /**
  *
@@ -212,6 +216,23 @@ public class CSVReader {
         return true;
     }
     
+    public static DataList getSingleColumn(String filename, int column, String columnSeparator) throws IOException {
+        if(filename == null || filename.equals("") || column < 0 || columnSeparator == null || columnSeparator.equals("")) {
+            return new DataList<String>();
+        }
+        BufferedReader reader = new BufferedReader(new FileReader(filename));
+        reader.readLine();//for header
+        String line = "";
+        String value = "";
+        DataList<String> data = new DataList<String>();
+        while(reader.ready()) {
+            line = reader.readLine();
+            value = parseLine(line, column, columnSeparator);
+            data.add(value);
+        }
+        return data;
+    }
+    
     /**
      * Gets a histogram for a single variable (column) for the entire file.  Returns and empty histogram if the filename or column separator are null or empty or if the column is less than 0.
      * @param filename
@@ -269,15 +290,19 @@ public class CSVReader {
     }
 
     public static double getMutualInformation(String filename, int column1, int column2, String columnSeparator) throws IOException {
-        double HXY = getJointDistribution(filename, new int[] { column1, column2}, columnSeparator).getEntropy();
+        /*double HXY = getJointDistribution(filename, new int[] { column1, column2}, columnSeparator).getEntropy();
         //System.out.println("HXY = " + HXY);
         double HX = getSingleDistribution(filename, column1, columnSeparator).getEntropy();
         //System.out.println("HX = " + HX);
         double HY = getSingleDistribution(filename, column2, columnSeparator).getEntropy();
         //System.out.println("HY = " + HY);
-        return HX + HY - HXY;
+        return HX + HY - HXY;*/
+        DataList col1 = getSingleColumn(filename, column1, columnSeparator);
+        DataList col2 = getSingleColumn(filename, column2, columnSeparator);
+        return Shannon.getMutualInformation(col1.getData(), col2.getData());
     }
-    static String scrub(String input) {
+    
+    protected static String scrub(String input) {
         return input.replace("\"", "");
     }
     

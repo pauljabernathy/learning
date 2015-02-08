@@ -32,7 +32,7 @@ public abstract class Genome {
             System.out.println("String");
         } else if(clazz.equals(Double.class)) {
             System.out.println("Double");
-            return new DoubleGenome(size);
+            return new DoubleGenome(size, null);
         } else if(clazz.equals(Integer.class)) {
             System.out.println("Integer");
         } else if(clazz.equals(int.class)) {
@@ -41,14 +41,9 @@ public abstract class Genome {
         return null;
     }
     
-    protected Genome() {
+    protected Genome(ProbDist<MutationType> mutationProbs) {
         this.genome = new ArrayList();
-        this.mutationProbs = new ProbDist<MutationType>();
-        this.mutationProbs.add(MutationType.POINT_VALUE_CHANGE, .25);
-        this.mutationProbs.add(MutationType.MULTIPLE_POINT_VALUE_CHANGE, .35);
-        this.mutationProbs.add(MutationType.POINT_DELETION, 0.0);   //let's not deal with changing the length just yet...
-        this.mutationProbs.add(MutationType.SWAP, .2);
-        this.mutationProbs.add(MutationType.GROUP_REVERSAL, .2);
+        this.mutationProbs = mutationProbs;
     }
     public int getSize() {
         return genome.size();

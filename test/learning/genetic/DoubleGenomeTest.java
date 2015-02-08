@@ -16,6 +16,10 @@ import toolbox.util.ListArrayUtil;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import toolbox.information.Shannon;
+
+import toolbox.stats.*;
+import toolbox.util.MathUtil;
 
 /**
  *
@@ -24,6 +28,7 @@ import java.util.Arrays;
 public class DoubleGenomeTest {
     
     private static Logger logger;
+    private ProbDist<MutationType> mutationProbs;
     
     public DoubleGenomeTest() {
     }
@@ -39,6 +44,12 @@ public class DoubleGenomeTest {
     
     @Before
     public void setUp() {
+        this.mutationProbs = new ProbDist<MutationType>();
+        this.mutationProbs.add(MutationType.POINT_VALUE_CHANGE, .25);
+        this.mutationProbs.add(MutationType.MULTIPLE_POINT_VALUE_CHANGE, .35);
+        this.mutationProbs.add(MutationType.POINT_DELETION, 0.0);   //let's not deal with changing the length just yet...
+        this.mutationProbs.add(MutationType.SWAP, .2);
+        this.mutationProbs.add(MutationType.GROUP_REVERSAL, .2);
     }
     
     @After
@@ -48,16 +59,87 @@ public class DoubleGenomeTest {
     @Test
     public void testConstructor() {
         logger.info("\ntesting constructor");
-        DoubleGenome instance = new DoubleGenome(0);
+        DoubleGenome instance = new DoubleGenome(0, mutationProbs);
         assertEquals(0, instance.getSize());
-        instance = new DoubleGenome(10);
+        instance = new DoubleGenome(10, mutationProbs);
         assertEquals(10, instance.getSize());
+        List<Double> data = instance.getRawData();
+        for(Double d : data) {
+            assertEquals(0.0, d, 0.0);
+        }
     }
+    
+    //TODO:  need a good way of testing for randomness - issue 2 for Toolbox on github
+    @Test
+    public void testGenerateRandom_noArgs() {
+        logger.info("\ntesting generateRandom()");
+        DoubleGenome instance = new DoubleGenome(0, mutationProbs);
+        List<Double> data = instance.getRawData();
+        for(Double d : data) {
+            assertEquals(0.0, d, 0.0);
+        }
+        
+        instance.generateRandom();
+        List<Double> randomizedData = instance.getRawData();
+        logger.debug(randomizedData);
+        assertEquals(true, ListArrayUtil.haveSameElements(data, randomizedData));   //should be the same because they both should be empty 
+        
+        
+        instance = new DoubleGenome(100, mutationProbs);
+        data = instance.getRawData();
+        for(Double d : data) {
+            assertEquals(0.0, d, 0.0);
+        }
+        
+        instance.generateRandom();
+        randomizedData = instance.getRawData();
+        logger.debug(randomizedData);
+        assertEquals(false, ListArrayUtil.haveSameElements(data, randomizedData));
+        assertEquals(0.5, MathUtil.mean(randomizedData), 0.05);
+        assertEquals(6.643, Shannon.getEntropy(randomizedData), 0.01);
+    }
+    
+    @Test
+    public void testGenerateRandomize_double_double() {
+        logger.info("\ntesting generateRandom(int low, int high)");
+        DoubleGenome instance = new DoubleGenome(0, mutationProbs);
+        List<Double> data = instance.getRawData();
+        for(Double d : data) {
+            assertEquals(0.0, d, 0.0);
+        }
+        
+        instance.generateRandom();
+        List<Double> randomizedData = instance.getRawData();
+        logger.debug(randomizedData);
+        assertEquals(true, ListArrayUtil.haveSameElements(data, randomizedData));   //should be the same because they both should be empty 
+        
+        
+        instance = new DoubleGenome(1000, mutationProbs);
+        data = instance.getRawData();
+        for(Double d : data) {
+            assertEquals(0.0, d, 0.0);
+        }
+        
+        instance.generateRandom(.1, .7);
+        randomizedData = instance.getRawData();
+        logger.debug(randomizedData);
+        assertEquals(false, ListArrayUtil.haveSameElements(data, randomizedData));
+        Summary summary = MathUtil.summary(randomizedData);
+        if(.1 > summary.min) {
+            fail("minimum was less than .1");
+        }
+        if(.7 < summary.max) {
+            fail("maximum was more than .7");
+        }
+        assertEquals(0.4, summary.mean, 0.01);
+        assertEquals(9.965, Shannon.getEntropy(randomizedData), 0.01);
+    }
+    
     @Test
     public void testSetAndGet_int() {
         logger.info("\ntesting set(int index) and get(int element)");
         int size = 10;
-        DoubleGenome genome = new DoubleGenome(size);
+        DoubleGenome genome = new DoubleGenome(size, mutationProbs);
         for(int i = 0; i < size; i++) {
             assertEquals(0.0, genome.get(i), 0.0);
         }
@@ -90,7 +172,7 @@ public class DoubleGenomeTest {
     public void testGet_int_int() {
         logger.info("\ntesting get(int start, int end)");
         int size = 10;
-        DoubleGenome genome = new DoubleGenome(size);
+        DoubleGenome genome = new DoubleGenome(size, mutationProbs);
         for(int i = 0; i < size; i++) {
             genome.set(i, new Double(i));
             logger.debug(genome.get(i));
@@ -143,7 +225,7 @@ public class DoubleGenomeTest {
     @Test
     public void setRawData_array() {
         logger.info("\ntesting setRawData(double[] data)");
-        DoubleGenome instance = new DoubleGenome(10);
+        DoubleGenome instance = new DoubleGenome(10, mutationProbs);
         assertEquals(10, instance.getSize());
         
         double[] data = null;
@@ -162,7 +244,7 @@ public class DoubleGenomeTest {
     @Test
     public void setRawData_List() {
         logger.info("\ntesting setRawData(List<Double> data)");
-        DoubleGenome instance = new DoubleGenome(10);
+        DoubleGenome instance = new DoubleGenome(10, mutationProbs);
         assertEquals(10, instance.getSize());
         
         //should not accept null input -> size should remain initial size
@@ -183,17 +265,18 @@ public class DoubleGenomeTest {
         assertEquals(4, instance.getSize());
         
         //now with new data bigger than the initial size - should not be a problem; size should automatically expand to fit it
-        instance = new DoubleGenome(0);
+        instance = new DoubleGenome(0, mutationProbs);
         assertEquals(0, instance.getSize());
         instance.setRawData(d);
         assertEquals(4, instance.getSize());
     }
     
+    //TODO:  test fails on occasion ( assertEquals(false, ListArrayUtil.haveSameElements(previousData, instance.getRawData())); ) - make sure it always does mutate
     @Test
     public void testMutate() {
         logger.info("\ntesting mutate()");
         int size = 40;
-        DoubleGenome instance = new DoubleGenome(size);
+        DoubleGenome instance = new DoubleGenome(size, mutationProbs);
         //double[] nums = toolbox.random.Random.getUniformDoubles(size, 0.0, 1.0);
         double[] nums = new double[size];
         List<Double> input = new ArrayList<Double>();
@@ -222,7 +305,7 @@ public class DoubleGenomeTest {
     public void testDoPointChangeMutation() {
         logger.info("\ntesting doPointChangeMutation()");
         int size = 40;
-        DoubleGenome instance = new DoubleGenome(size);
+        DoubleGenome instance = new DoubleGenome(size, mutationProbs);
         //double[] nums = null;
         
         //nums = new double[size];
@@ -268,7 +351,7 @@ public class DoubleGenomeTest {
     public void testDoMultiplePointValueChangeMutation() {
         logger.info("\ntesting doMultiplePointValueChangeMutation()");
         int size = 40;
-        DoubleGenome instance = new DoubleGenome(size);
+        DoubleGenome instance = new DoubleGenome(size, mutationProbs);
         //double[] nums = null;
         
         //nums = new double[size];
@@ -314,7 +397,7 @@ public class DoubleGenomeTest {
     public void testDoSwapMutation() {
         logger.info("\ntesting doSwapMutation()");
         int size = 40;
-        DoubleGenome instance = new DoubleGenome(size);
+        DoubleGenome instance = new DoubleGenome(size, mutationProbs);
         List<Double> input = null;
         List<Double> mutated = null;
         instance.setRawData(input);
@@ -359,7 +442,7 @@ public class DoubleGenomeTest {
     public void testDoGroupReversalMutation() {
         logger.info("\ntesting doGroupReveralMutation()");
         int size = 10;
-        DoubleGenome instance = new DoubleGenome(size);
+        DoubleGenome instance = new DoubleGenome(size, mutationProbs);
         List<Double> input = null;
         List<Double> mutated = null;
         instance.setRawData(input);
@@ -460,7 +543,7 @@ public class DoubleGenomeTest {
     public void testClone() {
         logger.info("\ntesting clone()");
         int size = 40;
-        DoubleGenome instance = new DoubleGenome(size);
+        DoubleGenome instance = new DoubleGenome(size, mutationProbs);
         //double[] nums = toolbox.random.Random.getUniformDoubles(size, 0.0, 1.0);
         double[] nums = new double[size];
         List<Double> input = new ArrayList<Double>();

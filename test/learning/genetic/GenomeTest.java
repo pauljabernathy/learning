@@ -12,7 +12,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import toolbox.util.ListArrayUtil;
-import toolbox.stats.Histogram;
+import toolbox.stats.*;
 import org.apache.log4j.*;
 import java.util.List;
 import java.util.ArrayList;
@@ -88,7 +88,13 @@ public class GenomeTest {
     @Test
     public void testGetRandomMutationType() {
         logger.info("\ntesting getMutationType()");
-        Genome instance = new DoubleGenome(0);
+        ProbDist<MutationType> mutationProbs = new ProbDist<MutationType>();
+        mutationProbs.add(MutationType.POINT_VALUE_CHANGE, .25);
+        mutationProbs.add(MutationType.MULTIPLE_POINT_VALUE_CHANGE, .35);
+        mutationProbs.add(MutationType.POINT_DELETION, 0.0);   //let's not deal with changing the length just yet...
+        mutationProbs.add(MutationType.SWAP, .2);
+        mutationProbs.add(MutationType.GROUP_REVERSAL, .2);
+        Genome instance = new DoubleGenome(0, mutationProbs);
         List<MutationType> results = new ArrayList<MutationType>();
         for(int i = 0; i < 10000; i++) {
             results.add(instance.getRandomMutationType());

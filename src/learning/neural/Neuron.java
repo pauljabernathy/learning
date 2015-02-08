@@ -5,6 +5,7 @@
 package learning.neural;
 
 import java.util.ArrayList;
+import java.util.List;
 
 //TODO:  a factory for this; pass in the inputs and weights in the constructor; this should help set up small a test network
 
@@ -46,7 +47,7 @@ public class Neuron {
     }
     
     /**
-     * calculates the output of the neuron
+     * calculates the output of the neuron; sets the object's output to the value calculated and returns that value
      * @return 
      */
     public synchronized double calculateOutput() {
@@ -71,7 +72,7 @@ public class Neuron {
         return this.output;
     }
     
-    protected double calculateRawOutput() {
+    public double calculateRawOutput() {
         double result = 0.0;
         for(int i = 0; i < this.weights.size(); i++) {
             result += this.weights.get(i) * this.inputs.get(i).getCachedOutput();
@@ -97,8 +98,32 @@ public class Neuron {
         this.weights.add(weight);
     }
     
-    public void setWeights() {
-        
+    public List<Neuron> getInputs() {
+        return this.inputs;
+    }
+    
+    public List<Double> getWeights() {
+        return this.weights;
+    }
+    
+    public void setInputs(ArrayList<Neuron> inputs, ArrayList<Double> weights) {
+        if(inputs == null || weights == null || inputs.isEmpty() || weights.isEmpty()) {
+            this.clear();
+        } else if(inputs.size() != weights.size()) {
+            //do nothing
+            System.out.println("different sizes:  " + inputs.size() + " " + weights.size());
+        } else {
+            System.out.println("same sizes");
+            this.inputs = inputs;
+            this.weights = weights;
+            this.setOutput(this.calculateRawOutput());
+        }
+    }
+    
+    public void clear() {
+        this.inputs = new ArrayList<Neuron>();
+        this.weights = new ArrayList<Double>();
+        this.output = Neuron.INACTIVE;
     }
     
     public int getNumInputs() {

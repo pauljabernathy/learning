@@ -74,7 +74,7 @@ public class UtilitiesTest {
     public void testToBinaryArray() {
         System.out.println("\ntesting toBinaryArray()");
         //Utilities.showArray(Utilities.toBinaryArray(-1));
-        //Utilities.showArray(Utilities.toBinaryArray(0));
+        Utilities.showArray(Utilities.toBinaryArray(0));
         //Utilities.showArray(Utilities.toBinaryArray(1));
         //Utilities.showArray(Utilities.toBinaryArray(2));
         //Utilities.showArray(Utilities.toBinaryArray(3));
@@ -155,5 +155,12 @@ public class UtilitiesTest {
         assertArrayEquals(new int[] { 0, 2, 0, 4, 5 }, Utilities.and(source, new int[] { 0, 2, 0, 2, 1 }));
         assertArrayEquals(new int[] { 0, 0, 0, 4, 5}, Utilities.and(new int[] { 1, 0, 3, 4, 5}, new int[] { 0, 2, 0, 2, 1 }));
         assertArrayEquals(new int[] { 0, 2, 0, 2, 1}, Utilities.and(new int[] { 0, 2, 0, 2, 1 }, new int[] { 1, 2, 3, 4, 5}));
+    }
+    
+    @Test
+    public void testOr() {
+        System.out.println("\ntesting or()");
+        System.out.println(Utilities.arrayToString(Utilities.or(new int[] { 1, 0, 0 }, new int[] { 0, 0, 0, 1})));
+        System.out.println(Utilities.arrayToString(Utilities.or(new int[] { 1, 0, 0, 1, 0, 0 }, new int[] { 0, 0, 0, 1})));
     }
 }

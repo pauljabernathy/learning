@@ -21,6 +21,10 @@ import learning.util.Utilities;
 
 import org.apache.log4j.*;
 
+//import toolbox.stats.DataList;
+import toolbox.stats.DataList;
+import toolbox.information.Shannon;
+
 /**
  *
  * @author paul
@@ -38,7 +42,7 @@ public class CSVReaderTest {
     public static void setUpClass() {
         logger = Logger.getLogger(CSVReaderTest.class);
         logger.addAppender(new ConsoleAppender(new PatternLayout( Constants.DEFAULT_LOG_FORMAT)));
-        logger.setLevel(Level.INFO);
+        logger.setLevel(Level.DEBUG);
     }
     
     @AfterClass
@@ -56,7 +60,7 @@ public class CSVReaderTest {
     @Test
     public void testLoadFromFile() {
         logger.info("\ntesting loadFromFile()");
-        String filename = "naive4.csv";
+        String filename = "titanic.csv";
         //filename = "titanic.csv";
         List<List> data = (List<List>)CSVReader.loadFromFile(filename, 10000);
         logger.debug(data.size());
@@ -200,6 +204,50 @@ public class CSVReaderTest {
     }
     
     @Test
+    public void testGetSingleColumn() {
+        logger.info("\ntesting getSingleColumn()");
+        DataList<String> result = null;
+        
+        try {
+            result = CSVReader.getSingleColumn("titanic.csv", 2, ",");
+            assertEquals(891, result.size());
+            for(int i = 0; i < 5; i++) {
+                logger.debug(result.get(i));
+            }
+            assertEquals("3", result.get(0));
+            assertEquals("1", result.get(1));
+            assertEquals("3", result.get(2));
+            assertEquals("1", result.get(3));
+            assertEquals("3", result.get(4));
+            assertEquals("3", result.get(5));
+            
+            assertEquals("2", result.get(886));
+            assertEquals("1", result.get(887));
+        } catch(IOException e) {
+            logger.error(e.getClass() + " in testGetSingleColumn():  " + e.getMessage());
+        }
+        
+        try {
+            result = CSVReader.getSingleColumn("titanic.csv", 5, ",");
+            assertEquals(891, result.size());
+            for(int i = 0; i < 5; i++) {
+                logger.debug(result.get(i));
+            }
+            assertEquals("male", result.get(0));
+            assertEquals("female", result.get(1));
+            assertEquals("female", result.get(2));
+            assertEquals("female", result.get(3));
+            assertEquals("male", result.get(4));
+            assertEquals("male", result.get(5));
+            
+            assertEquals("male", result.get(886));
+            assertEquals("female", result.get(887));
+        } catch(IOException e) {
+            logger.error(e.getClass() + " in testGetSingleColumn():  " + e.getMessage());
+        }
+    }
+    
+    @Test
     public void testGetSingleHistogram() {
         logger.info("\ntesting getSingleHistogram()");
         Histogram result = null;
@@ -295,21 +343,59 @@ public class CSVReaderTest {
         logger.info("\ntesting getMutualInformation()");
         try {
             double result = 0.0;
-            //result = CSVReader.getMutualInformation("titanic.csv", 2, 5, ",");
-            //logger.debug(result);
             
-            //result = CSVReader.getMutualInformation("titanic.csv", 0, 1, ",");
-            //logger.debug(CSVReader.getJointHistogram("titanic.csv", new int[] { 0, 1 }, ","));
-            //logger.debug(result);
-            
+            logger.debug("first with CSVReader.getMutualInforation():");
+            //CLASS(2), SEX(5), SIBSP(7), PARCH(8), EMBARKED(12), ISCHILD(13);
             logger.debug("\nclass and sex:  " + CSVReader.getMutualInformation("titanic.csv", 2, 5, ","));
-            logger.debug("class and child:  " + CSVReader.getMutualInformation("titanic.csv", 2, 13, ","));
-            logger.debug("sex and child:  " + CSVReader.getMutualInformation("titanic.csv", 5, 13, ","));
+            logger.debug("class and sibsp:  " + CSVReader.getMutualInformation("titanic.csv", 2, 7, ","));
+            logger.debug("class and parch:  " + CSVReader.getMutualInformation("titanic.csv", 2, 8, ","));
             logger.debug("class and port:  " + CSVReader.getMutualInformation("titanic.csv", 2, 12, ","));
-            //logger.debug(CSVReader.getMutualInformation("titanic.csv", 2, 14, ","));
+            logger.debug("class and child:  " + CSVReader.getMutualInformation("titanic.csv", 2, 13, ","));
+            
+            logger.debug("sex and sibsp:  " + CSVReader.getMutualInformation("titanic.csv", 5, 7, ","));
+            logger.debug("sex and parch:  " + CSVReader.getMutualInformation("titanic.csv", 5, 8, ","));
+            logger.debug("sex and port:  " + CSVReader.getMutualInformation("titanic.csv", 5, 12, ","));
+            logger.debug("sex and child:  " + CSVReader.getMutualInformation("titanic.csv", 5, 13, ","));
+            
+            logger.debug("sibsp and parch:  " + CSVReader.getMutualInformation("titanic.csv", 7, 8, ","));
+            logger.debug("sibsp and port:  " + CSVReader.getMutualInformation("titanic.csv", 7, 12, ","));
+            logger.debug("sibsp and child:  " + CSVReader.getMutualInformation("titanic.csv", 7, 13, ","));
+            
+            logger.debug("parch and port:  " + CSVReader.getMutualInformation("titanic.csv", 8, 12, ","));
+            logger.debug("parch and child:  " + CSVReader.getMutualInformation("titanic.csv", 8, 13, ","));
+            
+            logger.debug("port and child:  " + CSVReader.getMutualInformation("titanic.csv", 12, 13, ","));
+
+            logger.debug("\n--\nnow with Shannon.getMutualInformation():");
+            DataList<String> pclass = CSVReader.getSingleColumn("titanic.csv", 2, ",");
+            DataList<String> sex = CSVReader.getSingleColumn("titanic.csv", 5, ",");
+            DataList<String> sibsp = CSVReader.getSingleColumn("titanic.csv", 7, ",");
+            DataList<String> parch = CSVReader.getSingleColumn("titanic.csv", 8, ",");
+            DataList<String> port = CSVReader.getSingleColumn("titanic.csv", 12, ",");
+            DataList<String> child = CSVReader.getSingleColumn("titanic.csv", 13, ",");
+            
+            logger.debug("class and sex:  " + Shannon.getMutualInformation(pclass.getData(), sex.getData()));
+            logger.debug("class and sibsp:  " + Shannon.getMutualInformation(pclass.getData(), sibsp.getData()));
+            logger.debug("class and parch:  " + Shannon.getMutualInformation(pclass.getData(), parch.getData()));
+            logger.debug("class and port:  " + Shannon.getMutualInformation(pclass.getData(), port.getData()));
+            logger.debug("class and child:  " + Shannon.getMutualInformation(pclass.getData(), child.getData()));
+            
+            logger.debug("sex and sibsp:  " + Shannon.getMutualInformation(sex.getData(), sibsp.getData()));
+            logger.debug("sex and parch:  " + Shannon.getMutualInformation(sex.getData(), parch.getData()));
+            logger.debug("sex and port:  " + Shannon.getMutualInformation(sex.getData(), port.getData()));
+            logger.debug("sex and child:  " + Shannon.getMutualInformation(sex.getData(), child.getData()));
+            
+            logger.debug("sibsp and parch:  " + Shannon.getMutualInformation(sibsp.getData(), parch.getData()));
+            logger.debug("sibsp and port:  " + Shannon.getMutualInformation(sibsp.getData(), port.getData()));
+            logger.debug("sibsp and child:  " + Shannon.getMutualInformation(sibsp.getData(), child.getData()));
+            
+            logger.debug("parch and port:  " + Shannon.getMutualInformation(parch.getData(), port.getData()));
+            logger.debug("parch and child:  " + Shannon.getMutualInformation(parch.getData(), child.getData()));
+            
+            logger.debug("port and child:  " + Shannon.getMutualInformation(port.getData(), child.getData()));
             
         } catch(IOException e) {
-            logger.error(e.getClass() + " " + e.getMessage());
+            logger.error(e.getClass() + " in getGetMutualInformation(): " + e.getMessage());
         }
         logger.debug("----");
     }

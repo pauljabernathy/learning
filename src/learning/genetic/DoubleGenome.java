@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import toolbox.util.MathUtil;
+import toolbox.stats.ProbDist;
+import toolbox.random.Random;
 
 /**
  *
@@ -18,8 +20,8 @@ public class DoubleGenome extends Genome {
     
     private double minRandomValue;
     private double maxRandomValue;
-    public DoubleGenome(int size) {
-        super();
+    public DoubleGenome(int size, ProbDist<MutationType> mutationProbs) {
+        super(mutationProbs);
         super.genome = new ArrayList<Double>();
         for(int i = 0; i < size; i++) {
             super.genome.add(0.0);
@@ -28,9 +30,11 @@ public class DoubleGenome extends Genome {
     }
     
     public void generateRandom() {
-        for(int i = 0; i < super.genome.size(); i++) {
-            super.genome.set(i, Math.random());
-        }
+        super.genome = Random.getUniformDoublesList(super.getSize());
+    }
+    
+    public void generateRandom(double low, double high) {
+        super.genome = Random.getUniformDoublesList(super.getSize(), low, high);
     }
     
     public Double get(int index) {
@@ -92,7 +96,7 @@ public class DoubleGenome extends Genome {
     
     //TODO:  have mutate return a new genome but not update this's genome yet - let the calling code update it when 
     public List<Double> mutate() {
-        MutationType m = MutationType.POINT_VALUE_CHANGE;//super.getRandomMutationType();
+        MutationType m = super.getRandomMutationType();
         List<Double> mutated = new ArrayList<Double>();
         for(int i = 0; i < super.genome.size(); i++) {
             mutated.add((Double)super.genome.get(i));
@@ -219,7 +223,7 @@ public class DoubleGenome extends Genome {
      * clones this object
      */
     public DoubleGenome clone() {
-        DoubleGenome clone = new DoubleGenome(this.getSize());
+        DoubleGenome clone = new DoubleGenome(this.getSize(), super.mutationProbs);
         List<Double> cloneData = new ArrayList<Double>();
         for(int i = 0; i < super.getSize(); i++) {
             cloneData.add((Double)(super.genome.get(i)));
