@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 package learning.naivebayes;
-import learning.stats.ProbDist;
+import toolbox.stats.ProbDist;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -215,7 +215,7 @@ public class DataGenerator {
         dists3.add(colors3);
         dists3.add(numbers3);
         dists3.add(bools3);
-        c3.setFeatureDists(dists2);
+        c3.setFeatureDists(dists3);
         result.add(c3);
         return result;
     }
