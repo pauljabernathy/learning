@@ -4,8 +4,8 @@
  */
 package learning.naivebayes;
 
-import learning.stats.*;
-import learning.naivebayes.io.*;
+import toolbox.stats.*;
+import toolbox.io.*;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -26,11 +26,15 @@ public class Classifier {
     private Logger logger;
     
     public Classifier() {
-        this(learning.Constants.DEFAULT_LOG_LEVEL);
+        this(new ProbDist(), learning.Constants.DEFAULT_LOG_LEVEL);
     }
     
+    /**
+     * @deprecated 
+     * @param level 
+     */
     public Classifier(Level level) {
-        this.setDist(DataGenerator.getSampleProbDist());
+        //this.setDist(DataGenerator.getSampleProbDist());
         Classification c = dist.getValues().get(0);
         List<ProbDist> dists = c.getFeatureCPDs();
         
@@ -42,6 +46,13 @@ public class Classifier {
             //logger.debug(currentDist.getValues().get(0).getClass());
         }
     }
+    
+    public Classifier(ProbDist dist, Level level) {
+        this.dist = dist;
+        logger = Logger.getLogger(this.getClass());
+        logger.addAppender(new ConsoleAppender(new PatternLayout(learning.Constants.DEFAULT_LOG_FORMAT)));
+        logger.setLevel(level);
+    }
 
     public ProbDist<Classification> getDist() {
         return dist;
@@ -52,7 +63,7 @@ public class Classifier {
     }
     
     public void classify(String filename) {
-        List<List> data = (List<List>)CSVReader.loadFromFile(filename, MAX_LINES);   //must cast to List<List> to satifsfy compiler, even though that's what it already is
+        List<List> data = (List<List>)CSVReader.getRowsAsLists(filename, MAX_LINES);  //must cast to List<List> to satifsfy compiler, even though that's what it already is
         classify(data);
     }
     

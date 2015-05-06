@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 package learning.naivebayes;
-import learning.stats.ProbDist;
+import toolbox.stats.ProbDist;
 import java.util.List;
 import java.util.ArrayList;
 
