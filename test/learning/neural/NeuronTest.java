@@ -12,7 +12,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import toolbox.util.ListArrayUtil;
-import org.apache.log4j.*;
+import org.apache.logging.log4j.*;
 import java.util.ArrayList;
 import java.util.List;
 

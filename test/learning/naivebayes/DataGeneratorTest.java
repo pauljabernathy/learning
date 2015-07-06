@@ -5,10 +5,11 @@
 package learning.naivebayes;
 
 import toolbox.stats.ProbDist;
+import toolbox.util.ListArrayUtil;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
-import org.apache.log4j.*;
+import org.apache.logging.log4j.*;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -30,9 +31,7 @@ public class DataGeneratorTest {
     
     @BeforeClass
     public static void setUpClass() {
-        logger = Logger.getLogger("HandRankerTest");
-        logger.addAppender(new ConsoleAppender(new PatternLayout("%m%n")));
-        logger.setLevel(Level.INFO);
+        logger = ListArrayUtil.getLogger(DataGeneratorTest.class, Level.INFO);
     }
     
     @AfterClass

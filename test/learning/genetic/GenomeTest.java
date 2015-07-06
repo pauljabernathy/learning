@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 
 import toolbox.util.ListArrayUtil;
 import toolbox.stats.*;
-import org.apache.log4j.*;
+import org.apache.logging.log4j.*;
 import java.util.List;
 import java.util.ArrayList;
 

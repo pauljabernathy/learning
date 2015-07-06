@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.io.*;
 
-import org.apache.log4j.*;
+import org.apache.logging.log4j.*;
+import toolbox.Constants;
+import toolbox.util.ListArrayUtil;
 
 /**
  *
@@ -25,33 +27,20 @@ public class Classifier {
     private static final int MAX_LINES = 2000000;
     private Logger logger;
     
+    /**
+     * @deprecated
+     */
     public Classifier() {
         this(new ProbDist(), learning.Constants.DEFAULT_LOG_LEVEL);
     }
     
-    /**
-     * @deprecated 
-     * @param level 
-     */
-    public Classifier(Level level) {
-        //this.setDist(DataGenerator.getSampleProbDist());
-        Classification c = dist.getValues().get(0);
-        List<ProbDist> dists = c.getFeatureCPDs();
+    public Classifier(ProbDist dist) {
+        this(dist, learning.Constants.DEFAULT_LOG_LEVEL);
         
-        logger = Logger.getLogger(this.getClass());
-        logger.addAppender(new ConsoleAppender(new PatternLayout(learning.Constants.DEFAULT_LOG_FORMAT)));
-        logger.setLevel(level);
-        
-        for(ProbDist currentDist : dists) {
-            //logger.debug(currentDist.getValues().get(0).getClass());
-        }
     }
-    
     public Classifier(ProbDist dist, Level level) {
         this.dist = dist;
-        logger = Logger.getLogger(this.getClass());
-        logger.addAppender(new ConsoleAppender(new PatternLayout(learning.Constants.DEFAULT_LOG_FORMAT)));
-        logger.setLevel(level);
+        logger = ListArrayUtil.getLogger(this.getClass(), learning.Constants.DEFAULT_LOG_LEVEL);
     }
 
     public ProbDist<Classification> getDist() {
